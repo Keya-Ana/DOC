@@ -12,12 +12,19 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #e1e1ec;
+    background-image: url(../static/bg.webp);
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    height: 100vh;
+    margin: 0;
+    /* background: #e1e1ec; */
 }
 
 .wrapper {
     width: 420px;
-    background: #d4c1d1;
+    background:transparent ;
     color: aliceblue;
     border: 2px solid rgba(255, 255, 255, .2);
     backdrop-filter:blur(20px);
@@ -83,8 +90,9 @@ body {
     width: 100%;
     height: 45px;
     background: #efe7e7;
-    border-radius: 40px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    border-radius: 40px ;
+    border: #e1e1ec;
+    box-shadow: 0 0 10px rgba(127, 118, 118, 0.1);
     cursor: pointer;
     font-size: 16px;
     color: #333;
