@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Medication Reminder App</title>
+
+    <!-- Correct Material Symbols URL -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      <!-- aside Section Start-->
+      <aside>
+        <div class="top">
+          <div class="logo">
+            <h2>C <span class="danger">BABAR</span></h2>
+          </div>
+          <div class="close">
+            <span class="material-symbols-outlined" aria-label="Close menu"
+              >close</span
+            >
+          </div>
+        </div>
+        <!-- End top -->
+        <div class="sidebar">
+          <a href="#">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >grid_view</span
+            >
+            <h3>Dashboard</h3>
+          </a>
+
+          <a href="#" class="active">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >person</span
+            >
+            <h3>Customers</h3>
+          </a>
+
+          <a href="#">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >insights</span
+            >
+            <h3>Analytics</h3>
+          </a>
+
+          <a href="#">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >mail</span
+            >
+            <h3>Messages</h3>
+            <span class="msg_count">14</span>
+          </a>
+
+          <a href="#">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >inventory</span
+            >
+            <h3>Products</h3>
+          </a>
+
+          <a href="#">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >report</span
+            >
+            <h3>Reports</h3>
+          </a>
+
+          <a href="#">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >settings</span
+            >
+            <h3>Settings</h3>
+          </a>
+
+          <a href="#">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >add</span
+            >
+            <h3>Add Products</h3>
+          </a>
+
+          <a href="#">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >logout</span
+            >
+            <h3>Logout</h3>
+          </a>
+        </div>
+      </aside>
+      <!-- aside Section end-->
+      <!-- main section start -->
+      <main>
+        <h1>Dashboard</h1>
+        <div class="date">
+          <input type="date" />
+        </div>
+        <div class="insights">
+          <!--start selling  -->
+          <div class="sales">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >trending_up</span
+            >
+            <div class="middle">
+              <div class="left">
+                <h3>Total Sales</h3>
+                <h1>$25,823</h1>
+              </div>
+              <div class="progress">
+                <svg>
+                  <circle r="30" cy="40" cx="40"></circle>
+                </svg>
+                <div class="number">80%</div>
+              </div>
+            </div>
+            <small>Last 24 hours</small>
+          </div>
+          <!--end selling  -->
+
+          <!-- start expenses -->
+          <div class="expenses">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >local_mall</span
+            >
+            <div class="middle">
+              <div class="left">
+                <h3>Expenses</h3>
+                <h1>$25,823</h1>
+              </div>
+              <div class="progress">
+                <svg>
+                  <circle r="30" cy="40" cx="40"></circle>
+                </svg>
+                <div class="number">80%</div>
+              </div>
+            </div>
+            <small>Last 24 hours</small>
+          </div>
+          <!--end selling  -->
+
+          <!-- start expenses -->
+          <div class="income">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >stacked_line_chart</span
+            >
+            <div class="middle">
+              <div class="left">
+                <h3>Income</h3>
+                <h1>$25,823</h1>
+              </div>
+              <div class="progress">
+                <svg>
+                  <circle r="30" cy="40" cx="40"></circle>
+                </svg>
+                <div class="number">80%</div>
+              </div>
+            </div>
+            <small>Last 24 hours</small>
+          </div>
+          <!--end selling  -->
+        </div>
+        <!-- end inside -->
+        <!-- Start Recent Order -->
+        <div class="recent_order">
+          <h1>Recent Orders</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Product Number</th>
+                <th>Payments</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Mini USB</td>
+                <td>456</td>
+                <td>Due</td>
+                <td class="warning">Pending</td>
+                <td class="primary">Details</td>
+              </tr>
+
+              <tr>
+                <td>Mini USB</td>
+                <td>456</td>
+                <td>Due</td>
+                <td class="warning">Pending</td>
+                <td class="primary">Details</td>
+              </tr>
+
+              <tr>
+                <td>Mini USB</td>
+                <td>456</td>
+                <td>Due</td>
+                <td class="warning">Pending</td>
+                <td class="primary">Details</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- End Recent Order -->
+      </main>
+      <!-- main section end -->
+
+      <!-- right section start -->
+      <div class="right">
+        <div class="top">
+          <button id="menu_bar">
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >menu</span
+            >
+          </button>
+          <div class="theme-toggler">
+            <span class="material-symbols-outlined active" aria-hidden="true"
+              >light_mode</span
+            >
+            <span class="material-symbols-outlined" aria-hidden="true"
+              >dark_mode</span
+            >
+          </div>
+          <div class="profile">
+            <div class="info">
+              <p><b>Babar</b></p>
+              <p>Admin</p>
+              <small class="text-muted"></small>
+            </div>
+            <div class="profile-photo">
+              <img src="/static/images/profile-1.jpg" alt="" />
+            </div>
+          </div>
+        </div>
+        <!-- End Top -->
+        <!-- Start Recent Updates  -->
+
+        <div class="recent_updates">
+          <h2>Recent Updates</h2>
+<div class="updates">
+          <div class="update">
+            <div class="profile-photo">
+              <img src="/static/images/profile-2.jpg" alt="" />
+              <div class="Message">
+                <p><b>Babar</b>Recieved his order</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="update">
+            <div class="profile-photo">
+              <img src="/static/images/profile-2.jpg" alt="" />
+              <div class="Message">
+                <p><b>Babar</b>Recieved his order</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="update">
+            <div class="profile-photo">
+              <img src="/static/images/profile-2.jpg" alt="" />
+              <div class="Message">
+                <p><b>Babar</b>Recieved his order</p>
+              </div>
+            </div>
+          </div>
+        </div>
+          <!-- end recent updates -->
+          <!-- start sales Analytics -->
+          <div class="sales_analytics">
+            <h2>Sales Analytics</h2>
+            <div class="item">
+              <div class="icon">
+                <span class="material-symbols-outlined" aria-hidden="true"
+                  >shopping_cart</span
+                >
+              </div>
+              <div class="right_text">
+                <div class="info">
+                  <h3>onlion Orders</h3>
+                  <small class="text-muted">Last seen 2hours</small>
+                </div>
+                <h5 class="danger">-17%</h5>
+                <h3>3849</h3>
+              </div>
+            </div>
+
+           
+            <div class="item">
+              <div class="icon">
+                <span class="material-symbols-outlined" aria-hidden="true"
+                  >shopping_cart</span
+                >
+              </div>
+              <div class="right_text">
+                <div class="info">
+                  <h3>onlion Orders</h3>
+                  <small class="text-muted">Last seen 2hours</small>
+                </div>
+                <h5 class="danger">-17%</h5>
+                <h3>3849</h3>
+              </div>
+            </div>
+            <div class="item">
+              <div class="icon">
+                <span class="material-symbols-outlined" aria-hidden="true"
+                  >shopping_cart</span
+                >
+              </div>
+              <div class="right_text">
+                <div class="info">
+                  <h3>onlion Orders</h3>
+                  <small class="text-muted">Last seen 2hours</small>
+                </div>
+                <h5 class="danger">-17%</h5>
+                <h3>3849</h3>
+              </div>
+            </div>
+            
+          </div>
+          <!-- End sales Analytics -->
+        </div>
+        <div class="add_products">
+          <div>
+            <span class="material-symbols-outlined" aria-hidden="true">add</span>
+
+          </div>
+        </div>
+      </div>
+      <!-- end right section -->
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

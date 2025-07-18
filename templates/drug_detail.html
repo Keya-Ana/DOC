@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drug Detail</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='med.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Drug Detail</h1>
+            <div class="theme-toggler">
+                <span class="active">🌞</span>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div id="loader" class="loading">Loading drug data...</div>
+        <div id="drugDetail"></div>
+        <div id="error" class="notification error" style="display:none;"></div>
+    </div>
+    <script src="{{ url_for('static', filename='drug_detail.js') }}"></script>
+</body>
+</html>
