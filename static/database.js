@@ -310,3 +310,18 @@ function removePatient(id) {
         }
     });
 }
+
+async function testDatabase() {
+    await initDatabase();
+    
+    const allPatients = await getAllPatients();
+    console.log("All patients:", allPatients);
+    
+    const count = await getPatientCount();
+    console.log("Total patients:", count);
+
+    const recent = await getRecentPatients();
+    console.log("Recent patients:", recent);
+}
+
+window.addEventListener('DOMContentLoaded', testDatabase);
