@@ -233,11 +233,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // View patient button functionality
+    // Modal for patient details
+    const patientModal = document.getElementById('patient-modal');
+    const closeModal = document.getElementById('close-modal');
+    const modalPatientInfo = document.getElementById('modal-patient-info');
+
     document.querySelectorAll('.btn-view').forEach(button => {
         button.addEventListener('click', function() {
-            const patientName = this.closest('tr').querySelector('td:nth-child(2)').textContent.trim();
-            alert(`In a real application, this would open the detailed record for ${patientName}`);
+            const row = this.closest('tr');
+            const patientId = row.querySelector('td:nth-child(1)').textContent.trim();
+            const patientName = row.querySelector('td:nth-child(2)').textContent.trim();
+            const patientImg = row.querySelector('td:nth-child(2) img').src;
+            const condition = row.querySelector('td:nth-child(3)').textContent.trim();
+            const doctor = row.querySelector('td:nth-child(4)').textContent.trim();
+            const status = row.querySelector('td:nth-child(5) .badge').textContent.trim();
+
+            // Populate modal
+            modalPatientInfo.innerHTML = `
+              <div style="text-align:center;">
+                <img src="${patientImg}" alt="${patientName}" style="width:70px; height:70px; border-radius:50%; margin-bottom:1rem; object-fit:cover;">
+                <h2 style="margin-bottom:0.5rem;">${patientName}</h2>
+                <p style="margin-bottom:0.5rem;"><strong>ID:</strong> ${patientId}</p>
+                <p style="margin-bottom:0.5rem;"><strong>Condition:</strong> ${condition}</p>
+                <p style="margin-bottom:0.5rem;"><strong>Doctor:</strong> ${doctor}</p>
+                <p style="margin-bottom:0.5rem;"><strong>Status:</strong> <span class="badge">${status}</span></p>
+              </div>
+            `;
+            patientModal.style.display = 'flex';
         });
+    });
+
+    closeModal.addEventListener('click', function() {
+        patientModal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside content
+    patientModal.addEventListener('click', function(e) {
+        if (e.target === patientModal) {
+            patientModal.style.display = 'none';
+        }
     });
     
     // Simulate notification click
