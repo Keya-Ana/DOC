@@ -2,17 +2,39 @@ import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
+from patient import *
  
+
 def create_tables():
     conn = sqlite3.connect("med_reminder.db")
     cursor = conn.cursor()
-
+    # Users table
     cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         username TEXT UNIQUE NOT NULL,
                         email TEXT UNIQUE NOT NULL,
                         password TEXT NOT NULL)''')
-
+    # Patients table with all required columns
+    cursor.execute('''CREATE TABLE IF NOT EXISTS patients (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
+        dob TEXT NOT NULL,
+        gender TEXT NOT NULL,
+        address TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        email TEXT,
+        patient_type TEXT NOT NULL,
+        admission_date TEXT NOT NULL,
+        primary_condition TEXT NOT NULL,
+        condition_severity TEXT NOT NULL,
+        current_status TEXT NOT NULL,
+        medications TEXT,
+        notes TEXT,
+        photo TEXT,
+        staff_id INTEGER,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )''')
     conn.commit()
     conn.close()
 
@@ -201,6 +223,45 @@ def patients():
 
 
   # Looks in `templates/patients.html`
+from flask import jsonify
+
+@app.route("/api/patients", methods=["GET", "POST"])
+def api_patients():
+    if "user_id" not in session:
+        return jsonify({"error": "Not authorized"}), 401
+    if request.method == "POST":
+        import sys
+        data = request.get_json()
+        staff_id = session["user_id"]
+        columns = [
+            "first_name", "last_name", "dob", "gender", "address", "phone", "email",
+            "patient_type", "admission_date", "primary_condition", "condition_severity",
+            "current_status", "medications", "notes", "photo", "staff_id"
+        ]
+        values = [
+            data.get("first_name"), data.get("last_name"), data.get("dob"), data.get("gender"),
+            data.get("address"), data.get("phone"), data.get("email"), data.get("patient_type"),
+            data.get("admission_date"), data.get("primary_condition"), data.get("condition_severity"),
+            data.get("current_status"), data.get("medications"), data.get("notes"), data.get("photo"), staff_id
+        ]
+        print("[Add Patient] Received data:", data, file=sys.stderr)
+        print("[Add Patient] Insert values:", values, file=sys.stderr)
+        try:
+            conn = get_db_connection()
+            conn.execute(f"INSERT INTO patients ({','.join(columns)}) VALUES ({','.join(['?' for _ in columns])})", values)
+            conn.commit()
+            conn.close()
+            print("[Add Patient] Insert successful", file=sys.stderr)
+            return jsonify({"success": True}), 201
+        except Exception as e:
+            print(f"[Add Patient] Error: {e}", file=sys.stderr)
+            return jsonify({"error": str(e)}), 500
+    else:
+        conn = get_db_connection()
+        patients = conn.execute("SELECT * FROM patients WHERE staff_id = ?", (session["user_id"],)).fetchall()
+        conn.close()
+        return jsonify([dict(p) for p in patients])
+
 
 @app.route('/schedule')
 def schedule():
@@ -227,4 +288,4 @@ def staff():
     return render_template('staff.html')  
 
 if __name__ == "__main__":
-    app.run(debug=True)
+ app.run(debug=True)

@@ -1,15 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize database
-    initDatabase().then(() => {
-        // Load dashboard data
-        loadDashboard();
-        
-        // Set up event listeners
-        setupEventListeners();
-        
-        // Check for theme preference
-        checkThemePreference();
-    });
+    // Directly load dashboard and setup UI (no initDatabase needed)
+    loadDashboard();
+    setupEventListeners();
+    checkThemePreference();
 });
 
 // Theme functionality (same as before)
