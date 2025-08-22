@@ -1,39 +1,39 @@
 // Import the functions you need from the SDKs
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged  // 🔒 Needed to check login status
-} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+// import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+// import {
+//   getAuth,
+//   createUserWithEmailAndPassword,
+//   signInWithEmailAndPassword,
+//   signOut,
+//   onAuthStateChanged  // 🔒 Needed to check login status
+// } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+// import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
 // Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDHSHkB9cVXOix7ExRL2cn_aYvcXkMkXAc",
-  authDomain: "new--sign-in-ea29f.firebaseapp.com",
-  projectId: "new--sign-in-ea29f",
-  storageBucket: "new--sign-in-ea29f.firebasestorage.app",
-  messagingSenderId: "809988180692",
-  appId: "1:809988180692:web:3825a2663e61b0c2b30941"
-};
+// const firebaseConfig = {
+//   apiKey: "AIzaSyDHSHkB9cVXOix7ExRL2cn_aYvcXkMkXAc",
+//   authDomain: "new--sign-in-ea29f.firebaseapp.com",
+//   projectId: "new--sign-in-ea29f",
+//   storageBucket: "new--sign-in-ea29f.firebasestorage.app",
+//   messagingSenderId: "809988180692",
+//   appId: "1:809988180692:web:3825a2663e61b0c2b30941"
+// };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+// const auth = getAuth(app);
+// const db = getFirestore(app);
 
-// 🔒 Block access if not logged in
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    // Not signed in — redirect to login page
-    window.location.href = "../loginpage/login.html";
-  }
-  // Else user is signed in — let them stay on dashboard
-});
+// // 🔒 Block access if not logged in
+// onAuthStateChanged(auth, (user) => {
+//   if (!user) {
+//     // Not signed in — redirect to login page
+//     window.location.href = "../loginpage/login.html";
+//   }
+//   // Else user is signed in — let them stay on dashboard
+// });
 
-// ✅ Logout event handler
+// // ✅ Logout event handler
 // document.addEventListener("DOMContentLoaded", () => {
 //   const logoutBtn = document.getElementById("sign-out");
 //   if (logoutBtn) {
@@ -51,19 +51,19 @@ onAuthStateChanged(auth, (user) => {
 //   }
 // });
 
-logoutBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  signOut(auth)
-    .then(() => {
-      fetch('/logout')  // Flask session cleared
-        .then(() => {
-          window.location.href = "../loginpage/login.html";
-        });
-    })
-    .catch((error) => {
-      console.error("Logout failed:", error);
-    });
-});
+// logoutBtn.addEventListener("click", (e) => {
+//   e.preventDefault();
+//   signOut(auth)
+//     .then(() => {
+//       fetch('/logout')  // Flask session cleared
+//         .then(() => {
+//           window.location.href = "../loginpage/login.html";
+//         });
+//     })
+//     .catch((error) => {
+//       console.error("Logout failed:", error);
+//     });
+// });
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -246,19 +246,56 @@ document.addEventListener('DOMContentLoaded', function() {
             const patientImg = row.querySelector('td:nth-child(2) img').src;
             const condition = row.querySelector('td:nth-child(3)').textContent.trim();
             const doctor = row.querySelector('td:nth-child(4)').textContent.trim();
-            const status = row.querySelector('td:nth-child(5) .badge').textContent.trim();
+            // Always use the current status from the table, not the badge text
+            const status = row.querySelector('td:nth-child(5)').textContent.trim();
 
-            // Populate modal
-            modalPatientInfo.innerHTML = `
-              <div style="text-align:center;">
-                <img src="${patientImg}" alt="${patientName}" style="width:70px; height:70px; border-radius:50%; margin-bottom:1rem; object-fit:cover;">
-                <h2 style="margin-bottom:0.5rem;">${patientName}</h2>
-                <p style="margin-bottom:0.5rem;"><strong>ID:</strong> ${patientId}</p>
-                <p style="margin-bottom:0.5rem;"><strong>Condition:</strong> ${condition}</p>
-                <p style="margin-bottom:0.5rem;"><strong>Doctor:</strong> ${doctor}</p>
-                <p style="margin-bottom:0.5rem;"><strong>Status:</strong> <span class="badge">${status}</span></p>
-              </div>
-            `;
+            // Try to match patient in SAMPLE_PATIENTS for more info
+            let foundPatient = null;
+            if (window.SAMPLE_PATIENTS) {
+                foundPatient = window.SAMPLE_PATIENTS.find(p => `${p.first_name} ${p.last_name}`.toLowerCase() === patientName.toLowerCase());
+            }
+
+            // Build medical history and details
+            let medHistory = '';
+            if (foundPatient) {
+                medHistory = `
+                    <p><strong>Date of Birth:</strong> ${foundPatient.dob}</p>
+                    <p><strong>Gender:</strong> ${foundPatient.gender}</p>
+                    <p><strong>Address:</strong> ${foundPatient.address}</p>
+                    <p><strong>Phone:</strong> ${foundPatient.phone}</p>
+                    <p><strong>Email:</strong> ${foundPatient.email || 'N/A'}</p>
+                    <p><strong>Patient Type:</strong> ${foundPatient.patient_type}</p>
+                    <p><strong>Admission Date:</strong> ${foundPatient.admission_date}</p>
+                    <p><strong>Condition Severity:</strong> ${foundPatient.condition_severity}</p>
+                    <p><strong>Medications:</strong> ${foundPatient.medications}</p>
+                    <p><strong>Notes:</strong> ${foundPatient.notes}</p>
+                    <p><strong>Allergies:</strong> ${foundPatient.allergies || 'None'}</p>
+                    <p><strong>Surgeries:</strong> ${foundPatient.surgeries || 'None'}</p>
+                    <p><strong>Family History:</strong> ${foundPatient.family_history || 'None'}</p>
+                    <p><strong>Emergency Contact:</strong> ${foundPatient.emergency_contact || 'None'}</p>
+                `;
+            } else {
+                medHistory = `<p><em>No additional medical history found.</em></p>`;
+            }
+
+            // Populate modal with all info
+                        modalPatientInfo.innerHTML = `
+                                            <div style="text-align:center; max-height:350px; overflow-y:auto; padding:1rem 1.5rem; background:rgba(245,247,250,0.98); border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.12); font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+                                                <img src="${patientImg}" alt="${patientName}" style="width:70px; height:70px; border-radius:50%; margin-bottom:0.7rem; object-fit:cover; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                                                <h2 style="margin-bottom:0.3rem; font-size:1.35rem; font-weight:600; color:#166088; letter-spacing:0.5px;">${patientName}</h2>
+                                                <div style="margin-bottom:0.7rem;">
+                                                    <p style="margin:0.2rem 0; font-size:1rem;"><strong>ID:</strong> <span style='color:#4a6fa5;'>${patientId}</span></p>
+                                                    <p style="margin:0.2rem 0; font-size:1rem;"><strong>Condition:</strong> <span style='color:#f44336;'>${condition}</span></p>
+                                                    <p style="margin:0.2rem 0; font-size:1rem;"><strong>Doctor:</strong> <span style='color:#166088;'>${doctor}</span></p>
+                                                    <p style="margin:0.2rem 0; font-size:1rem;"><strong>Status:</strong> <span class="badge" style='font-size:0.95rem;'>${status}</span></p>
+                                                </div>
+                                                <hr style="margin:0.7rem 0; border:none; border-top:1px solid #e0e0e0;">
+                                                <h3 style="margin:0.5rem 0 0.3rem; font-size:1.08rem; color:#166088; font-weight:500;">Medical History & Details</h3>
+                                                <div style="text-align:left; font-size:0.98rem; line-height:1.6; color:#333;">
+                                                    ${medHistory}
+                                                </div>
+                                            </div>
+                                        `;
             patientModal.style.display = 'flex';
         });
     });
