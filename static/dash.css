@@ -25,17 +25,15 @@ body {
     background-color: var(--background);
     color: var(--text);
     line-height: 1.6;
-    
     background-image: url("../static/dashboard_4K_enhanced.png");
-    background-size: cover;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center center;
     height: 100vh;
     margin: 0;
-     opacity: 15;
-    /* Optional: use overlay or semi-transparent layers instead of this */
-    /* opacity: 15; → Removed, use rgba colors if needed instead */
+    /* Removed overlay for original look */
 }
+
 
 
 

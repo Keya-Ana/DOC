@@ -2,7 +2,7 @@ import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
-from patient import *
+
  
 
 def create_tables():

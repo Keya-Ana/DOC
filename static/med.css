@@ -1,3 +1,87 @@
+/* Modal for drug info pop-up */
+.drug-info-modal {
+    font-family: 'Poppins', sans-serif;
+    color: var(--clr-dark);
+}
+
+.drug-info-modal h2.article-title {
+    font-size: 2rem;
+    color: var(--clr-primary);
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.drug-info-modal .article-meta {
+    font-size: 1.1rem;
+    color: var(--clr-info-dark);
+    margin-bottom: 1.2rem;
+    text-align: center;
+}
+
+.drug-info-modal .article-body {
+    font-size: 1.15rem;
+    color: var(--clr-dark-variant);
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+}
+
+.drug-info-modal ul {
+    padding-left: 1.2rem;
+    margin-top: 0.5rem;
+}
+.drug-info-modal ul li {
+    font-size: 1rem;
+    color: var(--clr-info-dark);
+    margin-bottom: 0.5rem;
+}
+.drug-info-modal strong {
+    color: var(--clr-primary);
+    font-weight: 500;
+}
+
+.drug-info-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    background: var(--clr-white);
+    box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+    border-radius: var(--card-border-radius);
+    padding: 2.5rem 2rem 2rem 2rem;
+    z-index: 2000;
+    min-width: 350px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: modalFadeIn 0.3s ease;
+}
+
+.drug-info-modal .close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: var(--clr-danger);
+    color: var(--clr-white);
+    border: none;
+    border-radius: 50%;
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translate(-50%, -80%); }
+    to { opacity: 1; transform: translate(-50%, -60%); }
+}
 :root {
     --clr-primary: #7380ec;
     --clr-danger: #ff7782;
@@ -20,6 +104,51 @@
     --card-padding: 1.8rem;
     --padding-1: 1.2rem;
     --box-shadow: 0 2rem 3rem var(--clr-light);
+}
+
+.search-bar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem 0;
+}
+
+#drugSearchForm {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    max-width: 500px;
+}
+
+#drugSearchInput {
+    flex: 1;
+    padding: 1rem 1.2rem;
+    font-size: 1.2rem;
+    border-radius: var(--border-radius-2);
+    border: 1px solid var(--clr-info-light);
+    outline: none;
+    box-shadow: var(--box-shadow);
+    transition: border-color 0.2s;
+}
+
+#drugSearchInput:focus {
+    border-color: var(--clr-primary);
+}
+
+#drugSearchForm button {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    background: var(--clr-primary);
+    color: var(--clr-white);
+    border: none;
+    border-radius: var(--border-radius-2);
+    cursor: pointer;
+    box-shadow: var(--box-shadow);
+    transition: background 0.2s;
+}
+
+#drugSearchForm button:hover {
+    background: var(--clr-primary-variant);
 }
 
 .dark-theme-variables {
