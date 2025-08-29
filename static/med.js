@@ -158,6 +158,69 @@ function displayArticles() {
     });
 }
 
+// Show loading for drug info card
+function showDrugInfoLoading() {
+    removeDrugInfoModal();
+    const container = document.getElementById('drugInfoCardContainer');
+    if (container) {
+        container.innerHTML = '<div class="loading">Searching for drug info...</div>';
+    }
+}
+
+function removeDrugInfoModal() {
+    const oldModal = document.getElementById('drugInfoModal');
+    if (oldModal) oldModal.remove();
+}
+
+// Display drug info in a modal above the card
+function displayDrugInfoCard(data) {
+    removeDrugInfoModal();
+    const container = document.getElementById('drugInfoCardContainer');
+    if (container) container.innerHTML = '';
+    if (!data || data.error) {
+        if (container) {
+            container.innerHTML = `<div class="notification error">${data && data.error ? data.error : 'No data found.'}</div>`;
+        }
+        return;
+    }
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'drug-info-modal';
+    modal.id = 'drugInfoModal';
+    modal.innerHTML = `
+        <button class="close-modal" title="Close">&times;</button>
+        <h2 class="article-title">${data.brand_name || 'Drug Info'}</h2>
+        <div class="article-meta">Manufacturer: ${data.manufacturer || 'Unknown'}</div>
+        <div class="article-body">
+            <strong>Usage:</strong> <span>${data.usage || 'N/A'}</span><br>
+            <strong>Side Effects:</strong> <span>${data.side_effects || 'N/A'}</span><br>
+            <strong>Warnings:</strong> <span>${data.warnings || 'N/A'}</span><br>
+        </div>
+        <div class="article-body">
+            <strong>Interactions:</strong>
+            <ul>
+                ${(data.interactions && data.interactions.length > 0) ? data.interactions.map(i => `<li><b>${i.interacts_with}</b>: ${i.description}</li>`).join('') : '<li>None found</li>'}
+            </ul>
+        </div>
+    `;
+    // Add close functionality
+    modal.querySelector('.close-modal').onclick = function() {
+        modal.remove();
+    };
+    document.body.appendChild(modal);
+}
+
+// Fetch drug data and display
+async function fetchDrugDataAndDisplay(drugName) {
+    try {
+        const response = await fetch(`/api/drug-info?name=${encodeURIComponent(drugName)}`);
+        const data = await response.json();
+        displayDrugInfoCard(data);
+    } catch (error) {
+        displayDrugInfoCard({ error: 'Failed to connect to the server.' });
+    }
+}
+
 // UI Functions
 function showLoading() {
     console.log("Loading...");
@@ -179,7 +242,19 @@ function initializeApp() {
 
     // Load data
     fetchMedicalData();
-    // fetchDrugData("Amoxicillin")
+
+    // Search bar logic
+    const drugSearchForm = document.getElementById('drugSearchForm');
+    if (drugSearchForm) {
+        drugSearchForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const input = document.getElementById('drugSearchInput');
+            const drugName = input.value.trim();
+            if (!drugName) return;
+            showDrugInfoLoading();
+            await fetchDrugDataAndDisplay(drugName);
+        });
+    }
 }
 
 // Event Listeners

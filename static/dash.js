@@ -161,11 +161,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     sendButton.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
     
     // Switch between chat conversations
     const chatItems = document.querySelectorAll('.chat-item');
