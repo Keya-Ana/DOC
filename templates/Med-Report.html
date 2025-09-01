@@ -7,12 +7,26 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='med.css') }}">
 </head>
 <body>
+
     <div class="container">
         <div class="header">
-            <h1>Medical Healthcare</h1>
-            <div class="theme-toggler">
-                <span class="active">🌞</span>
-                <span>🌙</span>
+            <h1>MedInfo</h1>
+            <div class="header-bottom" style="width:100%; display:flex; justify-content:center; align-items:center; gap:1.5rem; margin-top:0.5rem;">
+                <a href="{{ url_for('dashboard') }}" class="dashboard-link">← Back to Dashboard</a>
+                <div class="theme-toggler">
+                    <span class="active">🌞</span>
+                    <span>🌙</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Motion Text Section -->
+        <div class="motion-text-section">
+            <div class="motion-bg">
+                <span class="motion-icon">💊</span>
+                <span class="motion-icon">🩺</span>
+                <span class="motion-icon">🍏</span>
+                <span class="motion-text" id="motionText">What do you want to know about a drug?</span>
             </div>
         </div>
 
@@ -26,8 +40,8 @@
 
         <div id="drugInfoCardContainer"></div>
 
-        <div class="grid-container" id="articlesContainer"></div>
-        <div class="loading" id="loading">Loading medical data...</div>
+        <!-- Rotating Health Advice Cards -->
+        <div class="advice-cards-container" id="adviceCardsContainer"></div>
     </div>
 
     <div class="notification-container" id="notificationContainer"></div>

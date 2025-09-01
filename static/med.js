@@ -1,3 +1,81 @@
+// Advice Data for rotating cards
+let adviceData = [
+  {
+    title: "Eat More Fruits & Veggies",
+    text: "A diet rich in fruits and vegetables can lower blood pressure, reduce risk of heart disease and stroke, and improve overall health.",
+    img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    title: "Stay Hydrated",
+    text: "Drinking enough water daily is essential for your body to function properly. Aim for 6-8 glasses a day.",
+    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    title: "Exercise Regularly",
+    text: "Physical activity helps control weight, reduces risk of chronic disease, and boosts your mood.",
+    img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    title: "Get Enough Sleep",
+    text: "Quality sleep is vital for mental and physical health. Adults should aim for 7-9 hours per night.",
+    img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    title: "Limit Processed Foods",
+    text: "Reduce intake of processed foods high in sugar, salt, and unhealthy fats for better health.",
+    img: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80"
+  },
+    {
+        title: "Practice Mindfulness",
+        text: "Mindfulness and meditation can reduce stress and improve your emotional well-being.",
+        img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+        title: "Wash Your Hands Often",
+        text: "Regular handwashing helps prevent the spread of germs and illness.",
+        img: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+        title: "Limit Screen Time",
+        text: "Take breaks from screens to protect your eyes and improve sleep quality.",
+        img: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+        title: "Maintain Social Connections",
+        text: "Staying connected with friends and family supports mental health.",
+        img: "https://images.unsplash.com/photo-1465101178521-c1a2b3a8e8d4?auto=format&fit=crop&w=400&q=80"
+    }
+];
+
+// Rotating advice cards
+let adviceIndex = 0;
+function displayAdviceCards() {
+  const adviceCardsContainer = document.getElementById('adviceCardsContainer');
+  if (!adviceCardsContainer) return;
+  adviceCardsContainer.innerHTML = '';
+    // Show 3 cards at a time, rotate every 1 min
+    const cardsToShow = 3;
+  for (let i = 0; i < cardsToShow; i++) {
+    const idx = (adviceIndex + i) % adviceData.length;
+    const advice = adviceData[idx];
+    const card = document.createElement('div');
+    card.className = 'advice-card';
+        card.innerHTML = `
+            <img src="${advice.img}" alt="${advice.title}" style="width:140px;height:140px;object-fit:cover;border-radius:1rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.10);">
+            <div class="advice-title">${advice.title}</div>
+            <div class="advice-text">${advice.text}</div>
+        `;
+    adviceCardsContainer.appendChild(card);
+  }
+}
+function startAdviceRotation() {
+    displayAdviceCards();
+    setInterval(() => {
+        adviceIndex = (adviceIndex + 1) % adviceData.length;
+        displayAdviceCards();
+    }, 60000); // 1 minute
+}
+
 // Backend Simulation
 let medicalData = [];
 
@@ -187,8 +265,15 @@ function displayDrugInfoCard(data) {
     const modal = document.createElement('div');
     modal.className = 'drug-info-modal';
     modal.id = 'drugInfoModal';
+    let drugImgHtml = '';
+    if (data.image_url) {
+        drugImgHtml = `<img src="${data.image_url}" alt="${data.brand_name || 'Drug'}">`;
+    } else {
+        drugImgHtml = `<div class="no-image">No image available for this drug.</div>`;
+    }
     modal.innerHTML = `
         <button class="close-modal" title="Close">&times;</button>
+        ${drugImgHtml}
         <h2 class="article-title">${data.brand_name || 'Drug Info'}</h2>
         <div class="article-meta">Manufacturer: ${data.manufacturer || 'Unknown'}</div>
         <div class="article-body">
@@ -240,8 +325,8 @@ function initializeApp() {
         document.querySelector('.theme-toggler span:nth-child(2)').classList.add('active');
     }
 
-    // Load data
-    fetchMedicalData();
+    // Start advice card rotation
+    startAdviceRotation();
 
     // Search bar logic
     const drugSearchForm = document.getElementById('drugSearchForm');
