@@ -29,10 +29,10 @@
             </nav>
 
             <div class="user-profile">
-                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Admin">
+                <img src="{{ user_profile_pic }}" alt="User Profile">
                 <div>
-                    <h4>Dr. Sarah Johnson</h4>
-                    <p>Chief Medical Officer</p>
+                    <h4>{{ user_name }}</h4>
+                    <p>Welcome!</p>
                 </div>
             </div>
         </div>
@@ -45,12 +45,17 @@
                     <input type="text" placeholder="Search patients, doctors, medications...">
                 </div>
                 <div class="header-actions">
-                    <div class="notification">
+                    <div class="notification" id="notification-bell" style="position:relative;">
                         <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
+                        <span class="badge" id="notification-count">0</span>
+                        <div id="notification-dropdown" style="display:none; position:absolute; right:0; top:40px; background:#fff; min-width:320px; max-width:400px; box-shadow:0 4px 16px rgba(0,0,0,0.15); border-radius:8px; z-index:1000;">
+                            <div style="padding:1rem; border-bottom:1px solid #eee; font-weight:600; color:#166088;">Notifications</div>
+                            <div id="notification-list" style="max-height:350px; overflow-y:auto;"></div>
+                            <div id="notification-empty" style="padding:1rem; text-align:center; color:#888; display:none;">No notifications.</div>
+                        </div>
                     </div>
                     <div class="user-menu">
-                        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Admin">
+                        <img src="{{ user_profile_pic }}" alt="User Profile">
                     </div>
                 </div>
             </header>
@@ -292,6 +297,59 @@
 
     <script src="{{ url_for('static', filename='dash.js') }}"></script>
     <script src="{{ url_for('static', filename='patients-data.js') }}"></script>
-    <script src="{{ url_for('static', filename='dash.js') }}"></script>
+    <script>
+    // Notification bell functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const bell = document.getElementById('notification-bell');
+        const dropdown = document.getElementById('notification-dropdown');
+        const list = document.getElementById('notification-list');
+        const count = document.getElementById('notification-count');
+        const empty = document.getElementById('notification-empty');
+
+        async function fetchNotifications() {
+            try {
+                const res = await fetch('/api/notifications');
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    count.textContent = data.length;
+                    list.innerHTML = data.map(n => `
+                        <div style="padding:0.8rem 1rem; border-bottom:1px solid #f0f0f0;">
+                            <div style="font-weight:600; color:#166088;">${n.patient_name || n.patientName || 'Patient'}</div>
+                            <div style="font-size:0.95rem; color:#333;">${n.medication || n.message || 'Medication Reminder'}</div>
+                            <div style="font-size:0.85rem; color:#888;">${n.reminder_time || n.time || ''}</div>
+                        </div>
+                    `).join('');
+                    list.style.display = '';
+                    empty.style.display = 'none';
+                } else {
+                    count.textContent = '0';
+                    list.innerHTML = '';
+                    list.style.display = 'none';
+                    empty.style.display = '';
+                }
+            } catch (e) {
+                count.textContent = '0';
+                list.innerHTML = '';
+                list.style.display = 'none';
+                empty.style.display = '';
+            }
+        }
+
+        bell.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            } else {
+                fetchNotifications();
+                dropdown.style.display = 'block';
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!bell.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+    </script>
 </body>
 </html>

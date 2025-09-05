@@ -1,6 +1,9 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from werkzeug.security import check_password_hash, generate_password_hash
+
 import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 
  
@@ -42,8 +45,27 @@ if __name__ == "__main__":
     create_tables()
 
 
+
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
+
+# API endpoint to serve reminders (notifications)
+@app.route('/api/notifications', methods=['GET'])
+def api_notifications():
+    # For demo: fetch reminders from DB or a file. Here, use a simple SQLite table 'reminders' if exists, else return empty list.
+    try:
+        conn = get_db_connection()
+        # If you have a reminders table, fetch from it. Otherwise, return []
+        reminders = []
+        try:
+            reminders = conn.execute('SELECT * FROM reminders ORDER BY id DESC LIMIT 10').fetchall()
+            reminders = [dict(r) for r in reminders]
+        except Exception:
+            reminders = []
+        conn.close()
+        return jsonify(reminders)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def get_db_connection():
     conn = sqlite3.connect("med_reminder.db")
@@ -205,6 +227,27 @@ def nocache(view):
     return no_cache
 
 
+
+# Helper: get user info by id
+def get_user_info(user_id):
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+    conn.close()
+    return user
+
+# Profile picture assignment (simple: random avatar based on user id)
+def get_profile_pic(user):
+    # If user has a photo column, use it; else, generate avatar
+    if user and 'photo' in user and user['photo']:
+        return user['photo']
+    # Use randomuser.me API for demo, based on user id for consistency
+    if user and 'id' in user:
+        avatar_id = int(user['id']) % 100
+        gender = 'men' if int(user['id']) % 2 == 0 else 'women'
+        return f'https://randomuser.me/api/portraits/{gender}/{avatar_id}.jpg'
+    # fallback
+    return 'https://randomuser.me/api/portraits/lego/1.jpg'
+
 # Protected Dashboard Route
 @app.route("/dashboard")
 @nocache
@@ -212,7 +255,15 @@ def dashboard():
     if "user_id" not in session:
         flash("Please log in first.", "warning")
         return redirect(url_for("login"))
-    return render_template("dashboard.html", email=session["email"])
+    user = get_user_info(session["user_id"])
+    user_name = user["username"] if user else "User"
+    user_profile_pic = get_profile_pic(user)
+    return render_template(
+        "dashboard.html",
+        email=session["email"],
+        user_name=user_name,
+        user_profile_pic=user_profile_pic
+    )
 
 @app.route('/patients')
 def patients():
