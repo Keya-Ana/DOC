@@ -1,4 +1,3 @@
-
 # Health & Medication Reminder
 
 ## 📌 Project Overview
@@ -13,8 +12,9 @@
 ## 🔥 Features
 - **User Authentication:** Secure login with session-based authentication
 - **Medication Management:** Add, edit, and delete medications (Name, Dosage, Time)
-- **Automated Reminders:** Set reminders & receive notifications
+- **Automated Reminders:** Set reminders & receive notifications (stored in reminders table)
 - **Track Medication History:** View past and upcoming doses
+- **Staff & Patient Management:** Manage staff and patient records
 
 ## ⚙️ Setup Instructions
 
@@ -27,18 +27,16 @@
 2. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
-   # Or, if requirements.txt is missing:
-   pip install Flask
    ```
 
 3. **Run the Application**
    ```bash
-   python app.py
+   python App.py
    ```
    Visit: [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ## 🌐 API Integration
-The app can fetch external health-related data using APIs (e.g., drug interactions, health tips). API integration details will be updated soon.
+The app can fetch external health-related data using APIs (e.g., drug interactions, health tips) using the `requests` package.
 
 ## 📂 Database Schema
 
@@ -48,8 +46,12 @@ The app can fetch external health-related data using APIs (e.g., drug interactio
 | 1   | john_doe  | john@example.com | hashed_pw1 |
 | 2   | jane_doe  | jane@example.com | hashed_pw2 |
 
-### Medications Table (`medications`)
-| id  | user_id | name        | dosage | time      |
-|-----|---------|-------------|--------|-----------|
-| 1   | 1       | Paracetamol | 500mg  | 08:00 AM  |
-| 2   | 2       | Ibuprofen   | 200mg  | 02:00 PM  |
+### Patients Table (`patients`)
+| id  | first_name | last_name | dob | gender | address | phone | email | patient_type | admission_date | primary_condition | condition_severity | current_status | medications | notes | photo | staff_id | created_at |
+|-----|------------|-----------|-----|--------|---------|-------|-------|--------------|---------------|------------------|--------------------|---------------|-------------|-------|-------|----------|------------|
+| ... | ...        | ...       | ... | ...    | ...     | ...   | ...   | ...          | ...           | ...              | ...                | ...           | ...         | ...   | ...   | ...      | ...        |
+
+### Reminders Table (`reminders`)
+| id  | patient_name | medication | reminder_time | dosage | sound_type | staff_id | created_at |
+|-----|--------------|-----------|---------------|--------|------------|----------|------------|
+| ... | ...          | ...       | ...           | ...    | ...        | ...      | ...        |

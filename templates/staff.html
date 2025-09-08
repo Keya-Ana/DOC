@@ -23,8 +23,9 @@
                 </div>
             </div>
             <nav>
-                <ul>
-                    <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                <ul> 
+                    <!-- <li class="active"><a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt" ></i> Dashboard</a></li> -->
+                    <li><a href="#" class="active" data-section="home"><i class="fas fa-home"></i> General Info</a></li>
                     <li><a href="#" data-section="doctors"><i class="fas fa-user-md"></i> Doctors</a></li>
                     <li><a href="#" data-section="nurses"><i class="fas fa-user-nurse"></i> Nurses</a></li>
                     <li><a href="#" data-section="support"><i class="fas fa-people-carry"></i> Support Staff</a></li>
@@ -35,8 +36,8 @@
         </header>
 
         <main>
-            <section id="dashboard" class="content-section active">
-                <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+            <section id="home" class="content-section active">
+                <h2><i class="fas fa-tachometer-alt"></i> General Info</h2>
                 <div class="stats-container">
                     <div class="stat-card doctor">
                         <h3>Doctors</h3>

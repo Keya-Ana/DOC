@@ -314,8 +314,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Simulate notification click
-    document.querySelector('.notification').addEventListener('click', function() {
-        alert('You have 3 new notifications:\n1. New lab results for Patient #P-1002\n2. Medication low stock alert\n3. Staff meeting reminder');
-    });
+    // document.querySelector('.notification').addEventListener('click', function() {
+    //     alert('You have 3 new notifications:\n1. New lab results for Patient #P-1002\n2. Medication low stock alert\n3. Staff meeting reminder');
+    // });
 });
 

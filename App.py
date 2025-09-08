@@ -38,6 +38,17 @@ def create_tables():
         staff_id INTEGER,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )''')
+    # Reminders table for notifications
+    cursor.execute('''CREATE TABLE IF NOT EXISTS reminders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        patient_name TEXT NOT NULL,
+        medication TEXT NOT NULL,
+        reminder_time TEXT NOT NULL,
+        dosage TEXT,
+        sound_type TEXT,
+        staff_id INTEGER,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )''')
     conn.commit()
     conn.close()
 
@@ -49,23 +60,45 @@ if __name__ == "__main__":
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  
 
-# API endpoint to serve reminders (notifications)
-@app.route('/api/notifications', methods=['GET'])
+@app.route('/api/notifications', methods=['GET', 'POST'])
 def api_notifications():
-    # For demo: fetch reminders from DB or a file. Here, use a simple SQLite table 'reminders' if exists, else return empty list.
-    try:
-        conn = get_db_connection()
-        # If you have a reminders table, fetch from it. Otherwise, return []
-        reminders = []
+    if request.method == 'POST':
+        if "user_id" not in session:
+            return jsonify({'error': 'Not authorized'}), 401
+        data = request.get_json()
+        staff_id = session["user_id"]
         try:
-            reminders = conn.execute('SELECT * FROM reminders ORDER BY id DESC LIMIT 10').fetchall()
-            reminders = [dict(r) for r in reminders]
-        except Exception:
+            conn = get_db_connection()
+            conn.execute(
+                '''INSERT INTO reminders (patient_name, medication, reminder_time, dosage, sound_type, staff_id)
+                   VALUES (?, ?, ?, ?, ?, ?)''',
+                (
+                    data.get('patientName'),
+                    data.get('medication'),
+                    data.get('reminderTime'),
+                    data.get('dosage'),
+                    data.get('soundType'),
+                    staff_id
+                )
+            )
+            conn.commit()
+            conn.close()
+            return jsonify({'success': True}), 201
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        try:
+            conn = get_db_connection()
             reminders = []
-        conn.close()
-        return jsonify(reminders)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+            try:
+                reminders = conn.execute('SELECT * FROM reminders ORDER BY id DESC LIMIT 10').fetchall()
+                reminders = [dict(r) for r in reminders]
+            except Exception:
+                reminders = []
+            conn.close()
+            return jsonify(reminders)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
 def get_db_connection():
     conn = sqlite3.connect("med_reminder.db")
@@ -131,7 +164,7 @@ def drug_detail():
 @app.route('/api/drug-info', methods=['GET'])
 def get_drug_info():
     import requests
-    from flask import request, jsonify
+    from flask import requests, jsonify
 
     drug_name = request.args.get('name')
     if not drug_name:
