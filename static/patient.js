@@ -1,3 +1,30 @@
+// --- DEMO DATA FUNCTIONS: Use window.SAMPLE_PATIENTS for all patient operations ---
+function getAllPatients() {
+    // Return a promise for compatibility
+    return Promise.resolve(window.SAMPLE_PATIENTS.slice());
+}
+
+function getPatientById(id) {
+    // id is the array index for demo purposes
+    const patient = window.SAMPLE_PATIENTS.find((p, idx) => p.id === id || idx === id || p.id == id);
+    return Promise.resolve(patient);
+}
+
+function addPatientToDB(patient) {
+    // Assign a fake id (array index)
+    patient.id = window.SAMPLE_PATIENTS.length;
+    window.SAMPLE_PATIENTS.push(patient);
+    return Promise.resolve();
+}
+
+function removePatient(id) {
+    // Remove by array index or id
+    let idx = window.SAMPLE_PATIENTS.findIndex((p, i) => p.id === id || i === id || p.id == id);
+    if (idx !== -1) {
+        window.SAMPLE_PATIENTS.splice(idx, 1);
+    }
+    return Promise.resolve();
+}
 document.addEventListener('DOMContentLoaded', function() {
     // Directly load dashboard and setup UI (no initDatabase needed)
     loadDashboard();

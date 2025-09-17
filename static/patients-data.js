@@ -2,6 +2,7 @@
 // Expose SAMPLE_PATIENTS globally for use in other scripts
 window.SAMPLE_PATIENTS = [
     {
+        id: 0,
         first_name: 'John',
         last_name: 'Smith',
         dob: '1985-04-12',
@@ -16,13 +17,14 @@ window.SAMPLE_PATIENTS = [
         current_status: 'Recovering',
         medications: 'Amoxicillin, Ibuprofen, Albuterol',
         notes: 'Patient responding well to treatment. Continue current medication regimen.',
-    photo: 'https://randomuser.me/api/portraits/men/32.jpg',
-    allergies: 'Penicillin',
-    surgeries: 'Appendectomy (2010)',
-    family_history: 'Father: Hypertension, Mother: Asthma',
-    emergency_contact: 'Jane Smith (Wife) - 555-4321'
+        photo: 'https://randomuser.me/api/portraits/men/32.jpg',
+        allergies: 'Penicillin',
+        surgeries: 'Appendectomy (2010)',
+        family_history: 'Father: Hypertension, Mother: Asthma',
+        emergency_contact: 'Jane Smith (Wife) - 555-4321'
     },
     {
+        id: 1,
         first_name: 'Emily',
         last_name: 'Johnson',
         dob: '1978-11-23',
@@ -42,8 +44,9 @@ window.SAMPLE_PATIENTS = [
         surgeries: 'None',
         family_history: 'Mother: Diabetes',
         emergency_contact: 'Paul Johnson (Husband) - 555-8765'
-        },
+    },
     {
+        id: 2,
         first_name: 'Michael',
         last_name: 'Williams',
         dob: '1992-07-30',
@@ -59,24 +62,13 @@ window.SAMPLE_PATIENTS = [
         medications: 'Morphine, Cefazolin, Metronidazole',
         notes: 'Post-op recovery. Monitor for infection. NPO until bowel sounds return.',
         photo: null,
-    allergies: 'Sulfa drugs',
-    surgeries: 'Gallbladder removal (2018)',
-    family_history: 'No major illnesses',
-    emergency_contact: 'Linda Williams (Mother) - 555-9013',
-    allergies: 'None',
-    surgeries: 'Knee replacement (2022)',
-    family_history: 'Father: Heart Disease',
-    emergency_contact: 'Tom Brown (Son) - 555-3457',
-    allergies: 'Aspirin',
-    surgeries: 'Heart bypass (2020)',
-    family_history: 'Mother: Stroke',
-    emergency_contact: 'Mary Jones (Daughter) - 555-7891',
-    allergies: 'None',
-    surgeries: 'None',
-    family_history: 'No major illnesses',
-    emergency_contact: 'Carlos Garcia (Brother) - 555-2346'
+        allergies: 'Sulfa drugs',
+        surgeries: 'Gallbladder removal (2018)',
+        family_history: 'No major illnesses',
+        emergency_contact: 'Linda Williams (Mother) - 555-9013'
     },
     {
+        id: 3,
         first_name: 'Sarah',
         last_name: 'Brown',
         dob: '1965-09-14',
@@ -94,6 +86,7 @@ window.SAMPLE_PATIENTS = [
         photo: null
     },
     {
+        id: 4,
         first_name: 'David',
         last_name: 'Jones',
         dob: '1958-12-03',
@@ -111,6 +104,7 @@ window.SAMPLE_PATIENTS = [
         photo: null
     },
     {
+        id: 5,
         first_name: 'Lisa',
         last_name: 'Garcia',
         dob: '1980-03-25',
