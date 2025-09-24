@@ -8,7 +8,7 @@ async function initDatabase() {
         locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/${file}`
     });
 
-    // Try to fetch the sql.db file
+    // Try to fetch the sql.db file (persistent database)
     let dbFileBuffer = null;
     try {
         const response = await fetch('sql.db');
@@ -17,7 +17,6 @@ async function initDatabase() {
             dbFileBuffer = new Uint8Array(arrayBuffer);
         }
     } catch (e) {
-        // If fetch fails, fallback to new DB
         dbFileBuffer = null;
     }
 
@@ -50,6 +49,14 @@ async function initDatabase() {
     if (count === 0) {
         insertSampleData();
     }
+}
+
+// Export the database to a Uint8Array (for saving to server or download)
+function exportStaffDatabase() {
+    if (db) {
+        return db.export();
+    }
+    return null;
 }
 
 function insertSampleData() {

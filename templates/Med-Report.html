@@ -20,13 +20,11 @@
             </div>
         </div>
 
-        <!-- Motion Text Section -->
+        <!-- Modern Banner Section -->
         <div class="motion-text-section">
-            <div class="motion-bg">
-                <span class="motion-icon">💊</span>
-                <span class="motion-icon">🩺</span>
-                <span class="motion-icon">🍏</span>
-                <span class="motion-text" id="motionText">What do you want to know about a drug?</span>
+            <div class="motion-bg" style="display:flex;align-items:center;gap:2rem;">
+                <img src="{{ url_for('static', filename='images/pharmacy.png') }}" alt="Pharmacy" style="height:70px;width:70px;border-radius:1.2rem;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.10);">
+                <span class="motion-text" id="motionText" style="font-size:1.5rem;font-weight:600;color:#fff;">What do you want to know about a drug?</span>
             </div>
         </div>
 
@@ -40,8 +38,8 @@
 
         <div id="drugInfoCardContainer"></div>
 
-        <!-- Rotating Health Advice Cards -->
-        <div class="advice-cards-container" id="adviceCardsContainer"></div>
+    <!-- Drug Info Result Section (inline) -->
+    <div id="drugInfoCardContainer"></div>
     </div>
 
     <div class="notification-container" id="notificationContainer"></div>
