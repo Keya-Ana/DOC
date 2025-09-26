@@ -5,9 +5,27 @@ from functools import wraps
 
  
 
+# Initialize Flask app at the top so it's defined before any route decorators
+app = Flask(__name__)
+app.secret_key = "your_secret_key"  
+
 def create_tables():
     conn = sqlite3.connect("med_reminder.db")
     cursor = conn.cursor()
+    # Staff table
+    cursor.execute('''CREATE TABLE IF NOT EXISTS staff (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        hire_date TEXT NOT NULL,
+        photo TEXT,
+        role_info TEXT NOT NULL,
+        staff_id INTEGER,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )''')
     # Users table
     cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,13 +67,44 @@ def create_tables():
     conn.commit()
     conn.close()
 
+
 if __name__ == "__main__":
     create_tables()
 
 
-
-app = Flask(__name__)
-app.secret_key = "your_secret_key"  
+# API endpoint to add and get staff, like patients
+@app.route('/api/staff', methods=['GET', 'POST'])
+def api_staff():
+    if "user_id" not in session:
+        return jsonify({"error": "Not authorized"}), 401
+    if request.method == "POST":
+        import sys
+        data = request.get_json()
+        staff_id = session["user_id"]
+        columns = [
+            "type", "first_name", "last_name", "email", "phone", "hire_date", "photo", "role_info", "staff_id"
+        ]
+        values = [
+            data.get("type"), data.get("first_name"), data.get("last_name"), data.get("email"),
+            data.get("phone"), data.get("hire_date"), data.get("photo"), data.get("role_info"), staff_id
+        ]
+        print("[Add Staff] Received data:", data, file=sys.stderr)
+        print("[Add Staff] Insert values:", values, file=sys.stderr)
+        try:
+            conn = get_db_connection()
+            conn.execute(f"INSERT INTO staff ({','.join(columns)}) VALUES ({','.join(['?' for _ in columns])})", values)
+            conn.commit()
+            conn.close()
+            print("[Add Staff] Insert successful", file=sys.stderr)
+            return jsonify({"success": True}), 201
+        except Exception as e:
+            print(f"[Add Staff] Error: {e}", file=sys.stderr)
+            return jsonify({"error": str(e)}), 500
+    else:
+        conn = get_db_connection()
+        staff = conn.execute("SELECT * FROM staff WHERE staff_id = ?", (session["user_id"],)).fetchall()
+        conn.close()
+        return jsonify([dict(s) for s in staff])
 
 @app.route('/api/notifications', methods=['GET', 'POST'])
 def api_notifications():
@@ -161,7 +210,7 @@ def drug_detail():
 @app.route('/api/drug-info', methods=['GET'])
 def get_drug_info():
     import requests
-    from flask import requests, jsonify
+    from flask import request, jsonify
 
     drug_name = request.args.get('name')
     if not drug_name:
@@ -222,6 +271,11 @@ def get_drug_info():
         usage = label.get('indications_and_usage', ["N/A"])[0]
         side_effects = label.get('adverse_reactions', ["N/A"])[0]
         warnings = label.get('warnings', ["N/A"])[0]
+        # Try to get directions (dosage and administration)
+        directions = label.get('dosage_and_administration', [None])[0]
+        if not directions or directions.strip() == '':
+            # Fallback to 'how_supplied' or 'information_for_patients' if available
+            directions = label.get('information_for_patients', [None])[0] or label.get('how_supplied', [None])[0] or "N/A"
     except (requests.RequestException, ValueError) as e:
         print("Error fetching FDA data:", e)
         return jsonify({'error': 'Failed to fetch drug label data'}), 502
@@ -230,6 +284,7 @@ def get_drug_info():
         'brand_name': brand_name,
         'manufacturer': manufacturer,
         'usage': usage,
+        'directions': directions,
         'side_effects': side_effects,
         'warnings': warnings,
         'interactions': interaction_list  # This may be an empty list if not found

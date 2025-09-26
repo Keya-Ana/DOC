@@ -1,69 +1,22 @@
-// Import the functions you need from the SDKs
-// import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-// import {
-//   getAuth,
-//   createUserWithEmailAndPassword,
-//   signInWithEmailAndPassword,
-//   signOut,
-//   onAuthStateChanged  // 🔒 Needed to check login status
-// } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-// import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
-// Firebase configuration
-// const firebaseConfig = {
-//   apiKey: "AIzaSyDHSHkB9cVXOix7ExRL2cn_aYvcXkMkXAc",
-//   authDomain: "new--sign-in-ea29f.firebaseapp.com",
-//   projectId: "new--sign-in-ea29f",
-//   storageBucket: "new--sign-in-ea29f.firebasestorage.app",
-//   messagingSenderId: "809988180692",
-//   appId: "1:809988180692:web:3825a2663e61b0c2b30941"
-// };
+// --- FIREBASE REAL-TIME CHAT SETUP ---
+// 1. Add your Firebase config below
+const firebaseConfig = {
+    apiKey: "AIzaSyDHSHkB9cVXOix7ExRL2cn_aYvcXkMkXAc",
+    authDomain: "new--sign-in-ea29f.firebaseapp.com",
+    projectId: "new--sign-in-ea29f",
+    storageBucket: "new--sign-in-ea29f.appspot.com",
+    messagingSenderId: "809988180692",
+    appId: "1:809988180692:web:3825a2663e61b0c2b30941"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-// const auth = getAuth(app);
-// const db = getFirestore(app);
-
-// // 🔒 Block access if not logged in
-// onAuthStateChanged(auth, (user) => {
-//   if (!user) {
-//     // Not signed in — redirect to login page
-//     window.location.href = "../loginpage/login.html";
-//   }
-//   // Else user is signed in — let them stay on dashboard
-// });
-
-// // ✅ Logout event handler
-// document.addEventListener("DOMContentLoaded", () => {
-//   const logoutBtn = document.getElementById("sign-out");
-//   if (logoutBtn) {
-//     logoutBtn.addEventListener("click", (e) => {
-//       e.preventDefault();
-//       signOut(auth)
-//         .then(() => {
-//           // Redirect to login on successful sign out
-//           window.location.href = "../loginpage/login.html";
-//         })
-//         .catch((error) => {
-//           console.error("Logout failed:", error);
-//         });
-//     });
-//   }
-// });
-
-// logoutBtn.addEventListener("click", (e) => {
-//   e.preventDefault();
-//   signOut(auth)
-//     .then(() => {
-//       fetch('/logout')  // Flask session cleared
-//         .then(() => {
-//           window.location.href = "../loginpage/login.html";
-//         });
-//     })
-//     .catch((error) => {
-//       console.error("Logout failed:", error);
-//     });
-// });
+// 2. Get user info (replace with real user info if available)
+const currentUser = {
+    name: 'You',
+    avatar: 'https://randomuser.me/api/portraits/women/65.jpg'
+};
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -97,77 +50,59 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update dashboard every 10 seconds
     setInterval(updateDashboard, 10000);
     
-    // Chat functionality
+
+    // --- REAL-TIME CHAT FUNCTIONALITY ---
     const chatInput = document.querySelector('.chat-input input');
     const sendButton = document.querySelector('.btn-send');
     const chatMessages = document.querySelector('.chat-messages');
-    
+
+    // Send message to Firestore
     function sendMessage() {
         const messageText = chatInput.value.trim();
-        if(messageText) {
-            const newMessage = document.createElement('div');
-            newMessage.className = 'message';
-            newMessage.innerHTML = `
-                <div class="message-avatar">
-                    <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="You">
-                </div>
-                <div class="message-content">
-                    <div class="message-header">
-                        <h4>You</h4>
-                        <span>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                    </div>
-                    <p>${messageText}</p>
-                </div>
-            `;
-            chatMessages.appendChild(newMessage);
+        if (messageText) {
+            db.collection('chat').add({
+                user: currentUser.name,
+                avatar: currentUser.avatar,
+                message: messageText,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
             chatInput.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // Simulate doctor reply after 1-3 seconds
-            setTimeout(() => {
-                const doctors = [
-                    {name: 'Dr. Williams', img: 'https://randomuser.me/api/portraits/men/42.jpg'},
-                    {name: 'Dr. Johnson', img: 'https://randomuser.me/api/portraits/women/63.jpg'},
-                    {name: 'Dr. Lee', img: 'https://randomuser.me/api/portraits/men/22.jpg'}
-                ];
-                const randomDoctor = doctors[Math.floor(Math.random() * doctors.length)];
-                const replies = [
-                    "I agree with that approach.",
-                    "Have you considered alternative treatments?",
-                    "Let's schedule a follow-up test.",
-                    "The patient's vitals are improving with this treatment.",
-                    "We should consult with a specialist about this case."
-                ];
-                const randomReply = replies[Math.floor(Math.random() * replies.length)];
-                
-                const replyMessage = document.createElement('div');
-                replyMessage.className = 'message';
-                replyMessage.innerHTML = `
-                    <div class="message-avatar">
-                        <img src="${randomDoctor.img}" alt="${randomDoctor.name}">
-                    </div>
-                    <div class="message-content">
-                        <div class="message-header">
-                            <h4>${randomDoctor.name}</h4>
-                            <span>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                        </div>
-                        <p>${randomReply}</p>
-                    </div>
-                `;
-                chatMessages.appendChild(replyMessage);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 1000 + Math.random() * 2000);
         }
     }
-    
+
     sendButton.addEventListener('click', sendMessage);
     if (chatInput) {
         chatInput.addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
+            if (e.key === 'Enter') {
                 sendMessage();
             }
         });
     }
+
+    // Listen for new messages in real time
+    db.collection('chat').orderBy('timestamp')
+        .onSnapshot(snapshot => {
+            chatMessages.innerHTML = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const newMessage = document.createElement('div');
+                newMessage.className = 'message';
+                newMessage.innerHTML = `
+                    <div class="message-avatar">
+                        <img src="${data.avatar || 'https://randomuser.me/api/portraits/men/42.jpg'}" alt="${data.user}">
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <h4>${data.user}</h4>
+                            <span>${data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
+                        </div>
+                        <p>${data.message}</p>
+                    </div>
+                `;
+                chatMessages.appendChild(newMessage);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
     
     // Switch between chat conversations
     const chatItems = document.querySelectorAll('.chat-item');

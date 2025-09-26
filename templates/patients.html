@@ -24,7 +24,7 @@
             </div>
             <nav>
                 <ul>
-                    <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-home"></i> General Info
                     <li><a href="#" data-section="patients"><i class="fas fa-procedures"></i> Patients</a></li>
                     <li><a href="#" data-section="medications"><i class="fas fa-pills"></i> Medications</a></li>
                     <li><a href="#" data-section="conditions"><i class="fas fa-diagnoses"></i> Conditions</a></li>
@@ -35,7 +35,7 @@
 
         <main>
             <section id="dashboard" class="content-section active">
-                <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                <h2><i class="fas fa-tachometer-alt"></i>General Info</h2>
                 <div class="stats-container">
                     <div class="stat-card patients">
                         <h3>Total Patients</h3>
@@ -114,22 +114,22 @@
                 <form id="addPatientForm">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="firstName">First Name</label>
+                            <label for="firstName">First Name <span style="color:red">*</span></label>
                             <input type="text" id="firstName" required>
                         </div>
                         <div class="form-group">
-                            <label for="lastName">Last Name</label>
+                            <label for="lastName">Last Name <span style="color:red">*</span></label>
                             <input type="text" id="lastName" required>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="dob">Date of Birth</label>
+                            <label for="dob">Date of Birth <span style="color:red">*</span></label>
                             <input type="date" id="dob" required>
                         </div>
                         <div class="form-group">
-                            <label for="gender">Gender</label>
+                            <label for="gender">Gender <span style="color:red">*</span></label>
                             <select id="gender" required>
                                 <option value="">Select Gender</option>
                                 <option value="Male">Male</option>
@@ -140,13 +140,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="address">Address</label>
+                        <label for="address">Address <span style="color:red">*</span></label>
                         <input type="text" id="address" required>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="phone">Phone</label>
+                            <label for="phone">Phone <span style="color:red">*</span></label>
                             <input type="tel" id="phone" required>
                         </div>
                         <div class="form-group">
@@ -157,7 +157,7 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="patientType">Patient Type</label>
+                            <label for="patientType">Patient Type <span style="color:red">*</span></label>
                             <select id="patientTypeForm" required>
                                 <option value="">Select Type</option>
                                 <option value="Inpatient">Inpatient</option>
@@ -165,18 +165,18 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="admissionDate">Admission Date</label>
+                            <label for="admissionDate">Admission Date <span style="color:red">*</span></label>
                             <input type="date" id="admissionDate" required>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="primaryCondition">Primary Condition</label>
+                        <label for="primaryCondition">Primary Condition <span style="color:red">*</span></label>
                         <input type="text" id="primaryCondition" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="conditionSeverityForm">Condition Severity</label>
+                        <label for="conditionSeverityForm">Condition Severity <span style="color:red">*</span></label>
                         <select id="conditionSeverityForm" required>
                             <option value="">Select Severity</option>
                             <option value="Mild">Mild</option>
@@ -236,17 +236,11 @@
             </div>
         </footer>
     </div>
-<!-- 
-    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script> -->
+
+    <script src="{{ url_for('static', filename='patients-data.js') }}"></script>
+    
     <script src="{{ url_for('static', filename='database.js') }}"></script>
     <script src="{{ url_for('static', filename='patient.js') }}"></script>
-    <!-- <script src="{{ url_for('static', filename='patient.js') }}"></script> -->
-
-     <!-- <audio id="notificationSound" src="/static/notification.wav" preload="auto"></audio>
-
-    <div class="notification-container" id="notificationContainer"></div> -->
-
-    
-    <script src="{{ url_for('static', filename='notify.js') }}"></script> 
+   
 </body>
 </html>

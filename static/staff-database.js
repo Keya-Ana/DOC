@@ -7,10 +7,25 @@ async function initDatabase() {
     const SQL = await initSqlJs({
         locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/${file}`
     });
-    
-    // Create a new database
-    db = new SQL.Database();
-    
+
+    // Try to fetch the sql.db file (persistent database)
+    let dbFileBuffer = null;
+    try {
+        const response = await fetch('sql.db');
+        if (response.ok) {
+            const arrayBuffer = await response.arrayBuffer();
+            dbFileBuffer = new Uint8Array(arrayBuffer);
+        }
+    } catch (e) {
+        dbFileBuffer = null;
+    }
+
+    if (dbFileBuffer && dbFileBuffer.length > 0) {
+        db = new SQL.Database(dbFileBuffer);
+    } else {
+        db = new SQL.Database();
+    }
+
     // Create tables if they don't exist
     db.run(`
         CREATE TABLE IF NOT EXISTS staff (
@@ -26,14 +41,22 @@ async function initDatabase() {
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     `);
-    
+
     // Insert some sample data if the database is empty
     const result = db.exec("SELECT COUNT(*) as count FROM staff");
     const count = result[0]?.values[0][0] || 0;
-    
+
     if (count === 0) {
         insertSampleData();
     }
+}
+
+// Export the database to a Uint8Array (for saving to server or download)
+function exportStaffDatabase() {
+    if (db) {
+        return db.export();
+    }
+    return null;
 }
 
 function insertSampleData() {

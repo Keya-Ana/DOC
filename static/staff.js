@@ -596,29 +596,44 @@ function addStaffMember() {
         role_info: JSON.stringify(roleInfo)
     };
     
-    addStaff(staffData).then(() => {
-        alert('Staff member added successfully!');
-        document.getElementById('addStaffForm').reset();
-        
-        // Reload the appropriate section
-        switch(staffType) {
-            case 'Doctor':
-                loadDoctors();
-                break;
-            case 'Nurse':
-                loadNurses();
-                break;
-            case 'Support':
-                loadSupportStaff();
-                break;
-            case 'Vendor':
-                loadVendors();
-                break;
+    // Send staff data to backend API to save in med_reminder.db
+    fetch('/api/staff', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(staffData)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to add staff');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Staff member added successfully!');
+            document.getElementById('addStaffForm').reset();
+            // Reload the appropriate section
+            switch(staffType) {
+                case 'Doctor':
+                    loadDoctors();
+                    break;
+                case 'Nurse':
+                    loadNurses();
+                    break;
+                case 'Support':
+                    loadSupportStaff();
+                    break;
+                case 'Vendor':
+                    loadVendors();
+                    break;
+            }
+            // Also update dashboard
+            loadDashboard();
+        } else {
+            throw new Error(data.error || 'Failed to add staff');
         }
-        
-        // Also update dashboard
-        loadDashboard();
-    }).catch(error => {
+    })
+    .catch(error => {
         console.error('Error adding staff:', error);
         alert('Failed to add staff member. Please try again.');
     });
