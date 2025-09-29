@@ -1,3 +1,6 @@
+.dark-theme-variables .most-searched-section h2 {
+    color: #fff !important;
+}
 /* Motion Text Section */
 .motion-text-section {
     display: flex;
@@ -31,6 +34,13 @@
 }
 
 /* Advice Cards Section */
+/* Most Searched Drugs Section */
+.most-searched-section h2 {
+    transition: color 0.2s;
+}
+.dark-theme-variables .most-searched-section h2 {
+    color: #fff !important;
+}
 .advice-cards-container {
     display: flex;
     justify-content: center;
@@ -73,25 +83,27 @@
     text-align: center;
     margin-bottom: 0.5rem;
 }
-/* Modal for drug info pop-up */
-.drug-info-modal {
-    font-family: 'Poppins', sans-serif;
-    color: var(--clr-dark);
-}
 
-.drug-info-modal h2.article-title {
-    font-size: 2rem;
-    color: var(--clr-primary);
-    margin-bottom: 0.8rem;
-    font-weight: 600;
-    text-align: center;
+:root {
+    --clr-primary: #2563eb; /* Hospital blue */
+    --clr-primary-variant: #1746a0; /* Deeper blue */
+    --clr-success: #41f1b6;
+    --clr-danger: #ff7782;
+    --clr-warning: #ff4edc;
+    --clr-white: #f8fbff; /* Soft hospital white */
+    --clr-info-dark: #3b5998; /* Muted blue for info */
+    --clr-info-light: #e3f0ff; /* Very light blue */
+    --clr-dark: #1a2a4f; /* Deep blue for text */
+    --clr-dark-variant: #4b6cb7; /* Blue-grey for variants */
+    --clr-light: rgba(37, 99, 235, 0.08); /* Blue-tinted shadow */
+    --clr-color-background: #e3f0ff; /* Page background */
 }
 
 .drug-info-modal .article-meta {
     font-size: 1.1rem;
     color: var(--clr-info-dark);
     margin-bottom: 1.2rem;
-    text-align: center;
+    background: linear-gradient(120deg, #e3f0ff 0%, #2563eb 100%);
 }
 
 .drug-info-modal .article-body {
@@ -112,7 +124,7 @@
 }
 .drug-info-modal strong {
     color: var(--clr-primary);
-    font-weight: 500;
+    background: linear-gradient(90deg, #e3f0ff 0%, #2563eb 100%);
 }
 
 .drug-info-modal {
@@ -122,8 +134,8 @@
     transform: translate(-50%, -60%);
     background: var(--clr-white);
     box-shadow: 0 4px 32px rgba(0,0,0,0.18);
-    border-radius: var(--card-border-radius);
-    padding: 2.5rem 2rem 2rem 2rem;
+    color: var(--clr-primary);
+    text-shadow: 0 2px 8px rgba(37,99,235,0.10);
     z-index: 2000;
     min-width: 350px;
     max-width: 90vw;
@@ -136,11 +148,11 @@
 }
 
 .drug-info-modal .close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    background: var(--clr-danger);
     color: var(--clr-white);
+    background: var(--clr-primary);
+    right: 1.5rem;
+    color: var(--clr-primary);
+    background: var(--clr-white);
     border: none;
     border-radius: 50%;
     width: 2.2rem;
@@ -150,7 +162,7 @@
     box-shadow: var(--box-shadow);
     display: flex;
     align-items: center;
-    justify-content: center;
+    background: linear-gradient(90deg, #2563eb 0%, #41f1b6 100%);
 }
 
 @keyframes modalFadeIn {
@@ -257,7 +269,7 @@ body.dark-theme-variables {
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(90deg, #e3f0ff 0%, #c7eafd 100%);
+    background: linear-gradient(120deg, #456890 0%, #5c6f97 100%);
     color: var(--clr-dark);
     transition: all 300ms ease;
 }

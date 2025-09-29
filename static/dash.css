@@ -3,10 +3,10 @@
     --primary: #4a6fa5;
     --secondary: #166088;
     --accent: #4fc3f7;
-    --background: #f5f7fa;
-    --card-bg: #ffffff;
-    --text: #333333;
-    --text-light: #666666;
+    --background: #6a7077;
+    --card-bg: #716d6d;
+    --text: #b5acac;
+    --text-light: #dcc7c7;
     --border: #e0e0e0;
     --success: #4caf50;
     --warning: #ff9800;
@@ -25,12 +25,12 @@ body {
     background-color: var(--background);
     color: var(--text);
     line-height: 1.6;
-    background-image: url("../static/dashboard_4K_enhanced.png");
-    background-size: contain;
+    background-image: url("../static/images/bg.jpg");
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
-    height: 100vh;
-    margin: 0;
+    /* height: 100vh;
+    margin: 0; */
     /* Removed overlay for original look */
 }
 
@@ -216,12 +216,14 @@ header {
 }
 
 .card {
-    background-color: var(--card-bg);
+    background: rgba(30, 34, 40, 0.45); /* dark overlay for readability */
     border-radius: 8px;
     padding: 1.5rem;
     display: flex;
     align-items: center;
     box-shadow: var(--shadow);
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
 }
 
 .card-icon {
@@ -287,10 +289,12 @@ header {
 }
 
 .section {
-    background-color: var(--card-bg);
+    background: rgba(30, 34, 40, 0.45); /* dark overlay for readability */
+    color: #fff;
     border-radius: 8px;
     box-shadow: var(--shadow);
     overflow: hidden;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
 }
 
 .section-header {
@@ -299,6 +303,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: #4a6fa5 !important; /* hospital blue for professional readability */
 }
 
 .section-header h2 {
@@ -539,7 +544,7 @@ td img {
 
 .message-content p {
     font-size: 0.9rem;
-    background-color: white;
+    background-color: grey;
     padding: 0.8rem;
     border-radius: 8px;
     box-shadow: var(--shadow);

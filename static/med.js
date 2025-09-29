@@ -48,9 +48,13 @@ function showNotification(message, type = 'info') {
 // Theme Toggler
 function toggleTheme() {
     document.body.classList.toggle('dark-theme-variables');
-    document.querySelectorAll('.theme-toggler span').forEach(span => {
-        span.classList.toggle('active');
-    });
+    const togglerSpans = document.querySelectorAll('.theme-toggler span');
+    togglerSpans.forEach(span => span.classList.remove('active'));
+    if (document.body.classList.contains('dark-theme-variables')) {
+        togglerSpans[1].classList.add('active'); // 🌙
+    } else {
+        togglerSpans[0].classList.add('active'); // 🌞
+    }
     localStorage.setItem('theme', document.body.classList.contains('dark-theme-variables') ? 'dark' : 'light');
 }
 
@@ -277,9 +281,21 @@ function hideLoading() {
 // Initialization
 function initializeApp() {
     // Load theme
+    const togglerSpans = document.querySelectorAll('.theme-toggler span');
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-theme-variables');
-        document.querySelector('.theme-toggler span:nth-child(2)').classList.add('active');
+        togglerSpans[1].classList.add('active');
+        togglerSpans[0].classList.remove('active');
+    } else {
+        document.body.classList.remove('dark-theme-variables');
+        togglerSpans[0].classList.add('active');
+        togglerSpans[1].classList.remove('active');
+    }
+
+    // Theme toggler event
+    const themeToggler = document.querySelector('.theme-toggler');
+    if (themeToggler) {
+        themeToggler.addEventListener('click', toggleTheme);
     }
 
     // Search bar logic
@@ -294,10 +310,68 @@ function initializeApp() {
             await fetchDrugDataAndDisplay(drugName);
         });
     }
+
+    // Render most searched drugs
+    renderMostSearchedDrugs();
 }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', initializeApp);
-if (themeToggler) {
-    themeToggler.addEventListener('click', toggleTheme);
+// Most Searched Drugs Data (static for demo, can be dynamic)
+const MOST_SEARCHED = [
+    {
+        name: "Paracetamol",
+        brand: "Tylenol",
+        info: "Pain reliever and fever reducer."
+    },
+    {
+        name: "Ibuprofen",
+        brand: "Advil",
+        info: "Nonsteroidal anti-inflammatory drug (NSAID)."
+    },
+    {
+        name: "Amoxicillin",
+        brand: "Amoxil",
+        info: "Antibiotic for bacterial infections."
+    },
+    {
+        name: "Metformin",
+        brand: "Glucophage",
+        info: "Used to treat type 2 diabetes."
+    },
+    {
+        name: "Amlodipine",
+        brand: "Norvasc",
+        info: "Calcium channel blocker for hypertension."
+    }
+];
+
+function renderMostSearchedDrugs() {
+    const container = document.getElementById('mostSearchedDrugs');
+    if (!container) return;
+    container.innerHTML = '';
+        // Drug images (local mapping, fallback to pharmacy.png)
+        const drugImages = {
+            Paracetamol: 'static/images/paracetamol.jpg',
+            Ibuprofen: 'static/images/ibuprofen.jpg',
+            Amoxicillin: 'static/images/amoxicillin.jpg',
+            Metformin: 'static/images/metformin.jpg',
+            Amlodipine: 'static/images/amlodipine.jpg',
+        };
+        MOST_SEARCHED.forEach(drug => {
+            const card = document.createElement('div');
+            card.className = 'advice-card';
+            const imgSrc = drugImages[drug.name] || 'static/images/pharmacy.png';
+            card.innerHTML = `
+                <img src="${imgSrc}" alt="${drug.name}" style="width:100px;height:100px;border-radius:1rem;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.10);margin-bottom:1rem;">
+                <div class="advice-title">${drug.name} <span style="color:#2563eb;font-size:0.95rem;">(${drug.brand})</span></div>
+                <div class="advice-text">${drug.info}</div>
+            `;
+            card.addEventListener('click', () => {
+                document.getElementById('drugSearchInput').value = drug.name;
+                showDrugInfoLoading();
+                fetchDrugDataAndDisplay(drug.name);
+            });
+            container.appendChild(card);
+        });
 }
+// Ensure app initializes after DOM is ready
+document.addEventListener('DOMContentLoaded', initializeApp);
