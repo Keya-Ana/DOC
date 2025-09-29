@@ -1,6 +1,9 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
+from functools import wraps
+
+ 
 
 # Initialize Flask app at the top so it's defined before any route decorators
 app = Flask(__name__)

@@ -1,429 +1,283 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
-    const reminderForm = document.getElementById('reminder-form');
-    const remindersList = document.getElementById('reminders-list');
-    const searchInput = document.getElementById('search-input');
-    const notificationModal = document.getElementById('notification-modal');
-    const notificationContent = document.getElementById('notification-content');
-    const dismissBtn = document.getElementById('dismiss-btn');
-    const snoozeBtn = document.getElementById('snooze-btn');
-    const closeModal = document.querySelector('.close-modal');
-    const soundTestBtn = document.getElementById('sound-test-btn');
-    const soundMuteBtn = document.getElementById('sound-mute-btn');
-    const soundSelect = document.getElementById('sound-select');
-    
-    // Store reminders and settings
-    let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
-    let activeNotification = null;
-    let isMuted = localStorage.getItem('isMuted') === 'true' || false;
-    let audioContext;
-    
-    try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) {
-        console.log('Web Audio API not supported:', e);
+    // --- Reminder Data ---
+    let reminders = [];
+
+    let isMuted = false;
+    let currentAudio = null;
+
+    // --- Show/Hide Interval Fields ---
+    function showIntervalFields() {
+        const interval = document.getElementById('interval').value;
+        document.getElementById('hours-interval-group').style.display = interval === 'hours' ? 'block' : 'none';
+        document.getElementById('days-of-week-group').style.display = interval === 'days' ? 'block' : 'none';
+        document.getElementById('custom-interval-group').style.display = interval === 'custom' ? 'block' : 'none';
     }
-    
-    // Initialize the app
-    function init() {
-        renderReminders();
-        checkReminders();
-        setInterval(checkReminders, 60000); // Check every minute
-        
-        // Load current time into time input for better UX
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        document.getElementById('reminder-time').value = `${hours}:${minutes}`;
-        
-        // Initialize sound controls
-        if (soundMuteBtn) {
-            soundMuteBtn.innerHTML = isMuted ? 
-                '<i class="fas fa-volume-mute"></i> Unmute' : 
-                '<i class="fas fa-volume-up"></i> Mute';
-        }
-        
-        // Load sound preferences
-        if (soundSelect) {
-            const savedSound = localStorage.getItem('notificationSound') || 'beep';
-            soundSelect.value = savedSound;
-        }
-    }
-    
-    // Form submission
-    reminderForm.addEventListener('submit', function(e) {
+    document.getElementById('interval').addEventListener('change', showIntervalFields);
+
+    // --- Add Reminder ---
+    document.getElementById('reminder-form').addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        const patientName = document.getElementById('patient-name').value.trim();
-        const medication = document.getElementById('medication').value.trim();
+
+        const patientName = document.getElementById('patient-name').value;
+        const medication = document.getElementById('medication').value;
+        const interval = document.getElementById('interval').value;
         const reminderTime = document.getElementById('reminder-time').value;
-        const dosage = document.getElementById('dosage').value.trim();
-        const soundType = soundSelect ? soundSelect.value : 'beep';
-        
-        const newReminder = {
-            id: Date.now(),
+        const dosage = document.getElementById('dosage').value;
+        const sound = document.getElementById('sound-select').value;
+
+        let hoursInterval = null;
+        let daysOfWeek = [];
+        let customDate = null;
+        let customTime = null;
+
+        if (interval === 'hours') {
+            hoursInterval = parseInt(document.getElementById('hours-interval').value, 10);
+        }
+        if (interval === 'days') {
+            document.querySelectorAll('input[name="days"]:checked').forEach(cb => {
+                daysOfWeek.push(cb.value);
+            });
+        }
+        if (interval === 'custom') {
+            customDate = document.getElementById('custom-date').value;
+            customTime = document.getElementById('custom-time').value;
+        }
+
+        const reminder = {
             patientName,
             medication,
+            interval,
             reminderTime,
             dosage,
-            soundType,
-            snoozed: false
+            sound,
+            hoursInterval,
+            daysOfWeek,
+            customDate,
+            customTime,
+            lastTriggered: null
         };
-        
-        reminders.push(newReminder);
-        saveReminders();
+
+        reminders.push(reminder);
         renderReminders();
-        reminderForm.reset();
-        
-        // Show success message
-        showToast('Reminder added successfully!');
+        this.reset();
+        showIntervalFields();
     });
-    
-    // Render reminders to the DOM
-    function renderReminders(filteredReminders = null) {
-        const remindersToRender = filteredReminders || reminders;
-        
-        if (remindersToRender.length === 0) {
-            remindersList.innerHTML = '<p class="no-reminders">No reminders added yet.</p>';
-            return;
-        }
-        
-        remindersList.innerHTML = remindersToRender.map(reminder => `
-            <div class="reminder-card" data-id="${reminder.id}">
-                <div class="reminder-info">
-                    <h3>${reminder.patientName}</h3>
-                    <p><strong>Medication:</strong> ${reminder.medication}</p>
-                    <p><strong>Dosage:</strong> ${reminder.dosage || 'Not specified'}</p>
-                    <p><strong>Sound:</strong> ${formatSoundType(reminder.soundType)}</p>
-                    <p class="reminder-time"><i class="far fa-clock"></i> ${formatTime(reminder.reminderTime)}</p>
-                </div>
-                <div class="reminder-actions">
-                    <button class="btn btn-danger delete-btn"><i class="fas fa-trash"></i> Delete</button>
-                </div>
-            </div>
-        `).join('');
-        
-        // Add event listeners to delete buttons
-        document.querySelectorAll('.delete-btn').forEach(btn => {
+
+    // --- Render Reminders ---
+    function renderReminders() {
+        const list = document.getElementById('reminders-list');
+        list.innerHTML = '';
+        reminders.forEach((reminder, idx) => {
+            let intervalInfo = '';
+            if (reminder.interval === 'hours') {
+                intervalInfo = `<span class="label">Every ${reminder.hoursInterval} hour(s)</span>`;
+            } else if (reminder.interval === 'days') {
+                intervalInfo = `<span class="label">On: ${reminder.daysOfWeek.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}</span>`;
+            } else if (reminder.interval === 'custom') {
+                intervalInfo = `<span class="label">At: ${reminder.customDate} ${reminder.customTime}</span>`;
+            } else {
+                intervalInfo = `<span class="label">No Repeat</span>`;
+            }
+
+            const reminderDiv = document.createElement('div');
+            reminderDiv.className = 'reminder-item';
+            reminderDiv.innerHTML = `
+                <strong>${reminder.patientName}</strong>
+                <div class="interval-info">${intervalInfo}</div>
+                <div><span class="label">Medication:</span> ${reminder.medication}</div>
+                <div><span class="label">Dosage:</span> ${reminder.dosage}</div>
+                <div><span class="label">Time:</span> ${reminder.reminderTime}</div>
+                <div class="sound-info"><span class="label">Sound:</span> ${reminder.sound}</div>
+                <button class="delete-reminder-btn" data-idx="${idx}"><i class="fas fa-trash"></i> Delete</button>
+            `;
+            list.appendChild(reminderDiv);
+        });
+
+        // Add delete event listeners
+        document.querySelectorAll('.delete-reminder-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                const card = this.closest('.reminder-card');
-                const id = parseInt(card.dataset.id);
-                deleteReminder(id);
+                const idx = parseInt(this.getAttribute('data-idx'), 10);
+                reminders.splice(idx, 1);
+                renderReminders();
             });
         });
     }
-    
-    // Delete a reminder
-    function deleteReminder(id) {
-        reminders = reminders.filter(reminder => reminder.id !== id);
-        saveReminders();
-        renderReminders();
-        showToast('Reminder deleted successfully!');
-    }
-    
-    // Save reminders to localStorage
-    function saveReminders() {
-        localStorage.setItem('reminders', JSON.stringify(reminders));
-    }
-    
-    // Check if any reminders match current time
+
+    // --- Notification Logic ---
     function checkReminders() {
         const now = new Date();
-        const currentHours = now.getHours().toString().padStart(2, '0');
-        const currentMinutes = now.getMinutes().toString().padStart(2, '0');
-        const currentTime = `${currentHours}:${currentMinutes}`;
-        
+        const nowTime = now.toTimeString().slice(0,5);
+
         reminders.forEach(reminder => {
-            if (reminder.reminderTime === currentTime && !reminder.snoozed) {
-                showNotification(reminder);
-            }
-        });
-    }
-    
-    // Show notification modal
-    function showNotification(reminder) {
-        activeNotification = reminder;
-        notificationContent.innerHTML = `
-            <p><strong>Patient:</strong> ${reminder.patientName}</p>
-            <p><strong>Medication:</strong> ${reminder.medication}</p>
-            <p><strong>Dosage:</strong> ${reminder.dosage || 'Not specified'}</p>
-            <p><strong>Time:</strong> ${formatTime(reminder.reminderTime)}</p>
-            <p>Please administer the medication now.</p>
-        `;
-        notificationModal.style.display = 'block';
-        
-        // Add flashing effect for visual notification
-        notificationContent.classList.add('flashing');
-        
-        // Play notification sound if not muted
-        if (!isMuted) {
-            playNotificationSound(reminder.soundType);
-        }
-        
-        // Vibrate if on mobile (optional)
-        if ('vibrate' in navigator) {
-            navigator.vibrate([200, 100, 200, 100, 200]);
-        }
-    }
-    
-    // Play notification sound based on type
-    function playNotificationSound(soundType = 'beep') {
-        if (isMuted || soundType === 'none') return;
-        
-        try {
-            if (soundType === 'beep') {
-                playBeepSound();
-            } else if (soundType === 'chime') {
-                playChimeSound();
-            } else if (soundType === 'alarm') {
-                playAlarmSound();
-            }
-        } catch (e) {
-            console.log('Sound playback error:', e);
-            // Fallback to simple beep if other sounds fail
-            playBeepSound();
-        }
-    }
-    
-    // Different sound types
-    function playBeepSound() {
-        if (!audioContext) return;
-        
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.type = 'sine';
-        oscillator.frequency.value = 800;
-        gainNode.gain.value = 0.5;
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.start();
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-        oscillator.stop(audioContext.currentTime + 0.5);
-    }
-    
-    function playChimeSound() {
-        if (!audioContext) return;
-        
-        const frequencies = [784, 659, 523];
-        const times = [0, 0.2, 0.4];
-        
-        frequencies.forEach((freq, i) => {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.value = freq;
-            gainNode.gain.value = 0.3;
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.start(audioContext.currentTime + times[i]);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + times[i] + 0.3);
-            oscillator.stop(audioContext.currentTime + times[i] + 0.3);
-        });
-    }
-    
-    function playAlarmSound() {
-        if (!audioContext) return;
-        
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.type = 'square';
-        oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.1);
-        gainNode.gain.value = 0.2;
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.start();
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-        oscillator.stop(audioContext.currentTime + 0.5);
-        
-        // Repeat after a short delay
-        setTimeout(() => {
-            if (notificationModal.style.display === 'block') {
-                playAlarmSound();
-            }
-        }, 600);
-    }
-    
-    // Close modal
-    function closeNotificationModal() {
-        notificationModal.style.display = 'none';
-        notificationContent.classList.remove('flashing');
-    }
-    
-    // Dismiss notification
-    dismissBtn.addEventListener('click', function() {
-        if (activeNotification) {
-            // Remove the reminder or mark it as completed
-            reminders = reminders.filter(r => r.id !== activeNotification.id);
-            saveReminders();
-            renderReminders();
-            activeNotification = null;
-        }
-        closeNotificationModal();
-    });
-    
-    // Snooze notification
-    snoozeBtn.addEventListener('click', function() {
-        if (activeNotification) {
-            // Mark as snoozed and update the time (+5 minutes)
-            const reminderIndex = reminders.findIndex(r => r.id === activeNotification.id);
-            if (reminderIndex !== -1) {
-                const [hours, minutes] = activeNotification.reminderTime.split(':');
-                const date = new Date();
-                date.setHours(parseInt(hours));
-                date.setMinutes(parseInt(minutes) + 5);
-                
-                const newHours = date.getHours().toString().padStart(2, '0');
-                const newMinutes = date.getMinutes().toString().padStart(2, '0');
-                
-                reminders[reminderIndex].reminderTime = `${newHours}:${newMinutes}`;
-                reminders[reminderIndex].snoozed = true;
-                saveReminders();
-                renderReminders();
-                
-                // Reset snoozed status after the new time passes
-                setTimeout(() => {
-                    const index = reminders.findIndex(r => r.id === activeNotification.id);
-                    if (index !== -1) {
-                        reminders[index].snoozed = false;
-                        saveReminders();
+            let shouldTrigger = false;
+
+            if (reminder.interval === 'hours' && reminder.hoursInterval) {
+                if (!reminder.lastTriggered) {
+                    if (nowTime === reminder.reminderTime) {
+                        shouldTrigger = true;
                     }
-                }, 5 * 60 * 1000); // 5 minutes
+                } else {
+                    const last = new Date(reminder.lastTriggered);
+                    const diffMs = now - last;
+                    const diffHours = diffMs / (1000 * 60 * 60);
+                    if (diffHours >= reminder.hoursInterval && nowTime === reminder.reminderTime) {
+                        shouldTrigger = true;
+                    }
+                }
+            } else if (reminder.interval === 'days' && reminder.daysOfWeek.length > 0) {
+                const today = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                if (reminder.daysOfWeek.includes(today) && nowTime === reminder.reminderTime) {
+                    if (!reminder.lastTriggered || new Date(reminder.lastTriggered).toDateString() !== now.toDateString()) {
+                        shouldTrigger = true;
+                    }
+                }
+            } else if (reminder.interval === 'custom' && reminder.customDate && reminder.customTime) {
+                const customDateTime = new Date(`${reminder.customDate}T${reminder.customTime}`);
+                if (
+                    now.getFullYear() === customDateTime.getFullYear() &&
+                    now.getMonth() === customDateTime.getMonth() &&
+                    now.getDate() === customDateTime.getDate() &&
+                    nowTime === reminder.customTime &&
+                    !reminder.lastTriggered
+                ) {
+                    shouldTrigger = true;
+                }
+            } else if (reminder.interval === 'none') {
+                if (nowTime === reminder.reminderTime && !reminder.lastTriggered) {
+                    shouldTrigger = true;
+                }
             }
-            activeNotification = null;
-        }
-        closeNotificationModal();
-        showToast('Reminder snoozed for 5 minutes');
-    });
-    
-    // Close modal when clicking X
-    closeModal.addEventListener('click', closeNotificationModal);
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(e) {
-        if (e.target === notificationModal) {
-            closeNotificationModal();
-        }
-    });
-    
-    // Sound test button
-    if (soundTestBtn) {
-        soundTestBtn.addEventListener('click', function() {
-            const soundType = soundSelect ? soundSelect.value : 'beep';
-            playNotificationSound(soundType);
+
+            if (shouldTrigger) {
+                triggerNotification(reminder);
+                reminder.lastTriggered = now.toISOString();
+            }
         });
     }
-    
-    // Mute button
-    if (soundMuteBtn) {
-        soundMuteBtn.addEventListener('click', function() {
-            isMuted = !isMuted;
-            this.innerHTML = isMuted ? 
-                '<i class="fas fa-volume-mute"></i> Unmute' : 
-                '<i class="fas fa-volume-up"></i> Mute';
-            localStorage.setItem('isMuted', isMuted);
-            
-            showToast(isMuted ? 'Notifications muted' : 'Notifications unmuted');
-        });
+
+    // --- Notification Modal & Sound ---
+    function triggerNotification(reminder) {
+        const modal = document.getElementById('notification-modal');
+        const content = document.getElementById('notification-content');
+        content.innerHTML = `
+            <strong>${reminder.patientName}</strong> - ${reminder.medication}<br>
+            Dosage: ${reminder.dosage}<br>
+            Time: ${reminder.reminderTime}<br>
+            Interval: ${reminder.interval}<br>
+            Sound: ${reminder.sound}
+        `;
+        modal.style.display = 'block';
+        playSound(reminder.sound);
     }
-    
-    // Sound selection change
-    if (soundSelect) {
-        soundSelect.addEventListener('change', function() {
-            localStorage.setItem('notificationSound', this.value);
-        });
-    }
-    
-    // Search functionality
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        if (searchTerm === '') {
-            renderReminders();
-            return;
+
+    // --- Sound Logic ---
+    function playSound(sound) {
+        if (isMuted) return;
+        let audio;
+        if (sound === 'beep' || !sound) {
+            audio = new Audio('/static/beep.wav');
+        } else if (sound === 'chime') {
+            audio = new Audio('/static/chime.wav');
+        } else if (sound === 'alarm') {
+            audio = new Audio('/static/alarm.wav');
         }
-        
-        const filteredReminders = reminders.filter(reminder => 
-            reminder.patientName.toLowerCase().includes(searchTerm) || 
-            reminder.medication.toLowerCase().includes(searchTerm)
-        );
-        
-        renderReminders(filteredReminders);
-    });
-    
-    // Helper functions
-    function formatTime(timeString) {
-        const [hours, minutes] = timeString.split(':');
-        const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const displayHour = hour % 12 || 12;
-        return `${displayHour}:${minutes} ${ampm}`;
+        if (audio) {
+            currentAudio = audio;
+            audio.play().catch(err => {
+                alert("Unable to play sound. Please interact with the page first (e.g., click Test Sound).");
+                console.error("Audio playback error:", err);
+            });
+        }
     }
-    
-    function formatSoundType(soundType) {
-        const soundNames = {
-            'beep': 'Default Beep',
-            'chime': 'Gentle Chime',
-            'alarm': 'Alarm Tone',
-            'none': 'No Sound'
-        };
-        return soundNames[soundType] || soundType;
+
+    function stopSound() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+        }
     }
-    
-    // Show toast notification
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast-notification';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
+
+    // --- Modal Controls ---
+    document.querySelector('.close-modal').onclick = function() {
+        document.getElementById('notification-modal').style.display = 'none';
+        stopSound();
+    };
+    document.getElementById('dismiss-btn').onclick = function() {
+        document.getElementById('notification-modal').style.display = 'none';
+        stopSound();
+    };
+    document.getElementById('snooze-btn').onclick = function() {
         setTimeout(() => {
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
-        }, 100);
-    }
-    
-    // Add toast styles dynamically
-    const style = document.createElement('style');
-    style.textContent = `
-        .toast-notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 24px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .toast-notification.show {
-            opacity: 1;
-        }
-        .no-reminders {
-            text-align: center;
-            color: var(--gray-color);
-            padding: 20px;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Initialize the app
-    init();
+            document.getElementById('notification-modal').style.display = 'block';
+            playSound(document.getElementById('sound-select').value);
+        }, 5 * 60 * 1000);
+        document.getElementById('notification-modal').style.display = 'none';
+        stopSound();
+    };
+    document.querySelectorAll('.sound-test-btn').forEach(btn => {
+        btn.onclick = function() {
+            // Try to get the selected sound from the closest form or modal
+            let soundSelect = btn.closest('form') 
+                ? btn.closest('form').querySelector('#sound-select')
+                : document.getElementById('sound-select');
+            let sound = soundSelect ? soundSelect.value : 'beep';
+            playSound(sound);
+        };
+    });
+    document.getElementById('sound-mute-btn').onclick = function() {
+        isMuted = !isMuted;
+        this.textContent = isMuted ? "Unmute" : "Mute";
+        stopSound();
+    };
+
+    // --- Search Reminders ---
+    document.getElementById('search-input').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const filtered = reminders.filter(r =>
+            r.patientName.toLowerCase().includes(query) ||
+            r.medication.toLowerCase().includes(query)
+        );
+        const list = document.getElementById('reminders-list');
+        list.innerHTML = '';
+        filtered.forEach((reminder, idx) => {
+            let intervalInfo = '';
+            if (reminder.interval === 'hours') {
+                intervalInfo = `<span class="label">Every ${reminder.hoursInterval} hour(s)</span>`;
+            } else if (reminder.interval === 'days') {
+                intervalInfo = `<span class="label">On: ${reminder.daysOfWeek.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}</span>`;
+            } else if (reminder.interval === 'custom') {
+                intervalInfo = `<span class="label">At: ${reminder.customDate} ${reminder.customTime}</span>`;
+            } else {
+                intervalInfo = `<span class="label">No Repeat</span>`;
+            }
+
+            const reminderDiv = document.createElement('div');
+            reminderDiv.className = 'reminder-item';
+            reminderDiv.innerHTML = `
+                <strong>${reminder.patientName}</strong>
+                <div class="interval-info">${intervalInfo}</div>
+                <div><span class="label">Medication:</span> ${reminder.medication}</div>
+                <div><span class="label">Dosage:</span> ${reminder.dosage}</div>
+                <div><span class="label">Time:</span> ${reminder.reminderTime}</div>
+                <div class="sound-info"><span class="label">Sound:</span> ${reminder.sound}</div>
+                <button class="delete-reminder-btn" data-idx="${reminders.indexOf(reminder)}"><i class="fas fa-trash"></i> Delete</button>
+            `;
+            list.appendChild(reminderDiv);
+        });
+
+        // Add delete event listeners for filtered list
+        document.querySelectorAll('.delete-reminder-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-idx'), 10);
+                reminders.splice(idx, 1);
+                renderReminders();
+            });
+        });
+    });
+
+    // --- Start Reminder Check ---
+    setInterval(checkReminders, 60000);
+    showIntervalFields();
+    renderReminders();
 });
