@@ -1,4 +1,3 @@
-
 // --- FIREBASE REAL-TIME CHAT SETUP ---
 // 1. Add your Firebase config below
 const firebaseConfig = {
@@ -13,9 +12,16 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // 2. Get user info (replace with real user info if available)
+const profileImages = [
+    '/static/images/profile-1.jpg',
+    '/static/images/profile-2.jpg',
+    '/static/images/profile-3.jpg',
+    '/static/images/profile-4.jpg'
+];
+const randomAvatar = profileImages[Math.floor(Math.random() * profileImages.length)];
 const currentUser = {
     name: 'You',
-    avatar: 'https://randomuser.me/api/portraits/women/65.jpg'
+    avatar: randomAvatar
 };
 
 
