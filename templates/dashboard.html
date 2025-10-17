@@ -33,7 +33,10 @@
             </nav>
 
             <div class="user-profile">
-                <img src="{{ user_profile_pic }}" alt="User Profile">
+                <img id="sidebar-profile-img" src="{{ user_profile_pic }}" alt="User Profile">
+                <!-- Profile image upload (hidden) -->
+                <input id="profile-upload" type="file" accept="image/*" style="display:none">
+                <button id="profile-edit" title="Change profile picture" style="margin-left:0.5rem; background:transparent; border:none; color:#fff; cursor:pointer;"><i class="fas fa-pencil-alt"></i></button>
                 <div>
                     <h4>{{ user_name }}</h4>
                     <p>Welcome!</p>
@@ -299,6 +302,17 @@
             </div>
         </div>
 
+        <!-- Logout Confirmation Modal -->
+        <div id="logout-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:10000; justify-content:center; align-items:center;">
+            <div style="background:#fff; border-radius:8px; padding:1.5rem; max-width:380px; width:90%; text-align:center; box-shadow:0 6px 30px rgba(0,0,0,0.25);">
+                <p style="font-size:1rem; color:#333; margin-bottom:1rem;"> are you sure you want to log out? </p>
+                <div style="display:flex; gap:0.75rem; justify-content:center;">
+                    <button id="logout-yes" style="background:#166088; color:#fff; border:none; padding:0.6rem 1rem; border-radius:6px; cursor:pointer;">Yes</button>
+                    <button id="logout-no" style="background:#f0f0f0; color:#333; border:none; padding:0.6rem 1rem; border-radius:6px; cursor:pointer;">No</button>
+                </div>
+            </div>
+        </div>
+
     <script src="{{ url_for('static', filename='dash.js') }}"></script>
     <script src="{{ url_for('static', filename='patients-data.js') }}"></script>
     <script>
@@ -354,6 +368,99 @@
             }
         });
     });
+    </script>
+    <script>
+    // Logout confirmation handler
+    (function(){
+        document.addEventListener('DOMContentLoaded', function(){
+            const signOut = document.getElementById('sign-out');
+            const modal = document.getElementById('logout-confirm');
+            const yes = document.getElementById('logout-yes');
+            const no = document.getElementById('logout-no');
+
+            if (!signOut || !modal || !yes || !no) return;
+
+            // prevent default navigation and show modal
+            signOut.addEventListener('click', function(e){
+                e.preventDefault();
+                modal.style.display = 'flex';
+            });
+
+            // No -> hide modal
+            no.addEventListener('click', function(){
+                modal.style.display = 'none';
+            });
+
+            // Yes -> follow link (safe navigation)
+            yes.addEventListener('click', function(){
+                const href = signOut.getAttribute('href');
+                if (href) {
+                    window.location.href = href;
+                } else {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    })();
+    </script>
+    <script>
+    // Profile image preview & optional upload
+    (function(){
+        document.addEventListener('DOMContentLoaded', function(){
+            const sidebarImg = document.getElementById('sidebar-profile-img');
+            const uploadInput = document.getElementById('profile-upload');
+            const editBtn = document.getElementById('profile-edit');
+
+            // Load from localStorage if available
+            try {
+                const stored = localStorage.getItem('profileImage');
+                if (stored && sidebarImg) sidebarImg.src = stored;
+            } catch (e) {
+                // ignore storage errors
+            }
+
+            if (!uploadInput || !editBtn || !sidebarImg) return;
+
+            editBtn.addEventListener('click', function(){
+                uploadInput.click();
+            });
+
+            uploadInput.addEventListener('change', async function(e){
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                // basic size check (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Please choose an image smaller than 5MB.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(evt){
+                    const dataUrl = evt.target.result;
+                    // preview immediately
+                    sidebarImg.src = dataUrl;
+                    try { localStorage.setItem('profileImage', dataUrl); } catch (e) {}
+                };
+                reader.readAsDataURL(file);
+
+                // Optional: try uploading to server endpoint
+                try {
+                    const form = new FormData();
+                    form.append('profile', file);
+                    const resp = await fetch('/upload-profile-image', { method: 'POST', body: form });
+                    if (resp.ok) {
+                        const json = await resp.json();
+                        if (json && json.url) {
+                            sidebarImg.src = json.url;
+                            try { localStorage.setItem('profileImage', json.url); } catch (e) {}
+                        }
+                    }
+                } catch (e) {
+                    // server not available or upload failed — keep local preview
+                }
+            });
+        });
+    })();
     </script>
 </body>
 </html>
